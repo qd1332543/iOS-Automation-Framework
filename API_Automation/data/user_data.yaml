@@ -1,0 +1,125 @@
+# 用户模块测试数据
+
+# ===== 登录测试数据 =====
+login_cases:
+  # 正常场景
+  - name: 正确手机号+正确验证码
+    phone: "13800138000"
+    code: "123456"
+    login_type: sms_code
+    expected_code: 0
+    expected_has_token: true
+    tags: [smoke, happy]
+
+  - name: 正确账号密码登录
+    phone: "13800138000"
+    password: "Test123456"
+    login_type: password
+    expected_code: 0
+    expected_has_token: true
+    tags: [happy]
+
+  # 异常场景
+  - name: 手机号为空
+    phone: ""
+    code: "123456"
+    expected_code: 1001
+    expected_msg: "手机号不能为空"
+    tags: [edge, invalid]
+
+  - name: 手机号格式错误-不足11位
+    phone: "1380013"
+    code: "123456"
+    expected_code: 1001
+    expected_msg: "手机号格式错误"
+    tags: [edge, invalid]
+
+  - name: 手机号格式错误-非数字
+    phone: "abcdefghijk"
+    code: "123456"
+    expected_code: 1001
+    expected_msg: "手机号格式错误"
+    tags: [edge, invalid]
+
+  - name: 验证码为空
+    phone: "13800138000"
+    code: ""
+    expected_code: 1002
+    expected_msg: "验证码不能为空"
+    tags: [edge, invalid]
+
+  - name: 验证码错误
+    phone: "13800138000"
+    code: "000000"
+    expected_code: 1003
+    expected_msg: "验证码错误或已过期"
+    tags: [edge, unhappy]
+
+  - name: 验证码位数错误（5位）
+    phone: "13800138000"
+    code: "12345"
+    expected_code: 1002
+    expected_msg: "验证码格式错误"
+    tags: [edge, invalid]
+
+  - name: 未注册的手机号
+    phone: "19999999999"
+    code: "123456"
+    expected_code: 1004
+    expected_msg: "该账号未注册"
+    tags: [edge, unhappy]
+
+# ===== 注册测试数据 =====
+register_cases:
+  - name: 正常注册
+    phone: "13900139001"
+    code: "123456"
+    password: "NewUser123"
+    expected_code: 0
+
+  - name: 手机号已存在
+    phone: "13800138000"  # 假设已存在的号码
+    code: "123456"
+    password: "NewUser123"
+    expected_code: 2001
+    expected_msg: "该手机号已被注册"
+
+# ===== 发送验证码测试数据 =====
+send_code_cases:
+  - name: 正常手机号发送验证码
+    phone: "13800138000"
+    scene: login
+    expected_code: 0
+
+  - name: 空手机号发送
+    phone: ""
+    scene: login
+    expected_code: 1001
+
+  - name: 同一手机号频繁调用（限流）
+    phone: "13800138000"
+    scene: login
+    expected_code: 1005
+    expected_msg: "操作过于频繁，请稍后再试"
+
+# ===== 个人信息修改测试数据 =====
+profile_cases:
+  - name: 修改昵称正常
+    nickname: "测试用户_自动"
+    expected_code: 0
+
+  - name: 昵称为空
+    nickname: ""
+    expected_code: 3001
+
+  - name: 昵称过长(超过20字)
+    nickname: "这是一个非常非常长的用户昵称用于测试边界值的情况"
+    expected_code: 3001
+
+  - name: 修改性别为男
+    gender: 1
+    expected_code: 0
+
+  - name: 修改性别为女
+    gender: 2
+    expected_code: 0

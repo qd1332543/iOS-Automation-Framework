@@ -1,0 +1,55 @@
+# iOS-Automation-Framework .gitignore
+
+# ==================== Python ====================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+.eggs/
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ==================== 测试报告 & 输出 ====================
+Reports/allure-results/
+Reports/allure-report/
+Reports/api-results/
+Reports/ui-results/
+Reports/logs/
+UI_Automation/screenshots/
+*.log
+test_output/
+
+# ==================== IDE ====================
+.idea/
+.vscode/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcsharedata/
+xcuserdata/
+DerivedData/
+
+# ==================== OS ====================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ==================== 环境配置 ====================
+.env
+.env.local
+config/environments.local.yaml
+
+# ==================== Appium ====================
+appium_temp/
+
+# ==================== Allure History ====================
+allure-results-history/
+
+# ==================== Misc ====================
+*.swp
+*.swo
+*~

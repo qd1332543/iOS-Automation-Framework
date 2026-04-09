@@ -1,0 +1,145 @@
+# 购物车 & 订单模块测试数据
+
+# ===== 购物车测试数据 =====
+cart_cases:
+  # 正常操作
+  - name: 添加商品到购物车-正常
+    product_id: 10001
+    spec_id: 20001
+    quantity: 1
+    expected_code: 0
+    tags: [smoke, happy]
+
+  - name: 批量添加多个不同商品
+    items:
+      - {product_id: 10001, spec_id: 20001, quantity: 2}
+      - {product_id: 10002, spec_id: 20002, quantity: 1}
+    expected_code: 0
+    tags: [happy]
+
+  - name: 修改商品数量-增加
+    cart_item_id: 50001
+    quantity: 5
+    expected_code: 0
+    tags: [happy]
+
+  - name: 修改商品数量-减少到1
+    cart_item_id: 50001
+    quantity: 1
+    expected_code: 0
+    tags: [happy]
+
+  # 边界/异常操作
+  - name: 数量为0（删除效果）
+    cart_item_id: 50001
+    quantity: 0
+    expected_code: 0
+    tags: [edge]
+
+  - name: 数量为负数
+    cart_item_id: 50001
+    quantity: -1
+    expected_code: 4001
+    expected_msg: "数量必须大于0"
+    tags: [edge, invalid]
+
+  - name: 数量超过库存上限
+    cart_item_id: 50001
+    quantity: 99999
+    expected_code: 4002
+    expected_msg: "库存不足"
+    tags: [edge, unhappy]
+
+  - name: 添加不存在规格的商品
+    product_id: 10001
+    spec_id: 99999
+    quantity: 1
+    expected_code: 404
+    tags: [edge, unhappy]
+
+  - name: 移除购物车中的商品
+    cart_item_id: 50001
+    expected_code: 0
+    tags: [happy]
+
+  - name: 清空购物车
+    expected_code: 0
+    tags: [regression]
+
+# ===== 订单创建测试数据 =====
+order_create_cases:
+  - name: 创建订单-正常流程
+    address_id: 80001
+    items:
+      - {cart_item_id: 50001, spec_id: 20001, quantity: 1}
+    coupon_id: null
+    remark: "自动化测试订单"
+    expected_code: 0
+    has_order_no: true
+    tags: [smoke, happy]
+
+  - name: 创建订单-使用优惠券
+    address_id: 80001
+    items:
+      - {cart_item_id: 50001, spec_id: 20001, quantity: 1}
+    coupon_id: 90001
+    remark: ""
+    expected_code: 0
+    tags: [happy]
+
+  - name: 创建订单-多件商品
+    address_id: 80001
+    items:
+      - {cart_item_id: 50001, spec_id: 20001, quantity: 2}
+      - {cart_item_id: 50002, spec_id: 20002, quantity: 1}
+      - {cart_item_id: 50003, spec_id: 20003, quantity: 1}
+    coupon_id: null
+    remark: "批量购买测试"
+    expected_code: 0
+    tags: [happy]
+
+  # 异常情况
+  - name: 地址不存在
+    address_id: 9999999
+    items:
+      - {cart_item_id: 50001, spec_id: 20001, quantity: 1}
+    expected_code: 4003
+    expected_msg: "收货地址不存在"
+    tags: [edge, unhappy]
+
+  - name: 购物车项不存在
+    address_id: 80001
+    items:
+      - {cart_item_id: 99999, spec_id: 20001, quantity: 1}
+    expected_code: 4004
+    expected_msg: "购物车项不存在"
+    tags: [edge, unhappy]
+
+  - name: 空购物车项列表
+    address_id: 80001
+    items: []
+    expected_code: 4005
+    expected_msg: "订单不能为空"
+    tags: [edge, invalid]
+
+# ===== 订单状态流转测试数据 =====
+order_status_cases:
+  - name: 待支付订单取消
+    initial_status: pending
+    action: cancel
+    reason: "不想要了"
+    expected_status: cancelled
+    tags: [smoke]
+
+  - name: 已发货确认收货
+    initial_status: shipping
+    action: confirm_receive
+    expected_status: completed
+    tags: [happy]
+
+  - name: 重复取消已取消的订单
+    order_no: "TEST_CANCELLED_001"
+    reason: "再次取消"
+    expected_code: 4010
+    expected_msg: "当前状态不允许此操作"
+    tags: [edge, unhappy]

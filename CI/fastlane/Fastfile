@@ -1,0 +1,97 @@
+# Fastfile - iOS 打包与测试自动化配置
+# 使用方式: fastlane ios [lane_name]
+
+default_platform(:ios)
+
+# ===================== 全局配置 =====================
+before_all do
+    setup_travis
+end
+
+# ===================== Lanes =====================
+
+platform :ios do
+  
+  desc "运行 XCUITest UI 自动化测试"
+  lane :ui_test do
+    # 模拟器配置
+    simulator_name = ENV["SIMULATOR_NAME"] || "iPhone 15 Pro"
+    simulator_os_version = ENV["OS_VERSION"] || "17.2"
+    
+    # 启动模拟器
+    run_core(device: simulator_name,
+                 os: simulator_os_version,
+                 scheme: ENV["SCHEME"] || "YunluAppUITests",
+                 output_directory: "./test_output",
+                 output_types: "junit,html",
+                 code_coverage: true,
+                 devices: ["iPhone 15 Pro"],
+                 skip_build: true,
+                 skip_package_deps_resolution: true,
+                 only_testing: ["YunluAppUITests/*"]
+    )
+  end
+  
+  desc "Debug 构建并运行测试"
+  lane :build_and_test do
+    # 构建 Debug 包
+    build_app(
+      scheme: ENV["SCHEME"] || "YunluApp",
+      configuration: "Debug",
+      output_directory: "./build",
+      clean: true,
+      silent: true
+    )
+    
+    # 运行测试
+    ui_test
+  end
+  
+  desc "Release 构建"
+  lane :release_build do
+    # 构建 Release 包
+    gym(
+      scheme: ENV["SCHEME"] || "YunluApp",
+      configuration: "Release",
+      export_method: "app-store-connect",
+      output_directory: "./build/release",
+      output_name: "YunluApp_#{Time.now.strftime('%Y%m%d_%H%M%S')}",
+      include_symbols: true,
+      include_bitcode: true,
+      clean: true
+    )
+  end
+  
+  desc "上传到 TestFlight / App Store Connect"
+  lane :upload_to_tfc do
+    release_build
+    
+    pilot(
+      api_key_path: ENV["APPLE_API_KEY_PATH"] || "",
+      app_identifier: ENV["BUNDLE_ID"] || "com.yunlu.app",
+      changelog: ENV["CHANGELOG"] || "自动化测试版本更新",
+      skip_waiting_for_build_processing: true,
+      skip_submission: true
+    )
+  end
+  
+  desc "清理构建产物"
+  lane :clean do
+    clear_derived_data(
+      keep_simulators: true
+    )
+    
+    xcclean(
+      scheme: ENV["SCHEME"] || "YunluApp"
+    )
+  end
+  
+  # 错误处理
+  error do |lane, exception|
+    puts "❌ Lane #{lane} 执行出错!"
+    puts exception.message
+    puts exception.backtrace.join("\n")
+    
+    # 发送失败通知（可集成钉钉/Slack）
+  end
+end

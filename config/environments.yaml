@@ -1,0 +1,74 @@
+# 多环境配置文件
+# 使用方式: TEST_ENV=prod pytest
+
+dev:
+  name: 开发环境
+  api:
+    base_url: https://api-dev.yunlu.com
+    timeout: 30
+  
+  app:
+    platform: iOS
+    device_name: iPhone 15 Pro
+    platform_version: 17.2
+    app_path: /path/to/YunluApp.dev.app
+    no_reset: true
+  
+  database:
+    host: localhost
+    port: 3306
+    db: yunlu_dev
+    user: root
+    password: ""
+  
+  test_account:
+    phone: "13800138000"
+    code: "123456"
+
+staging:
+  name: 预发布环境
+  api:
+    base_url: https://api-staging.yunlu.com
+    timeout: 30
+  
+  app:
+    platform: iOS
+    device_name: iPhone 15 Pro
+    platform_version: 17.2
+    app_path: /path/to/YunluApp.staging.app
+    no_reset: true
+  
+  database:
+    host: staging-db.yunlu.com
+    port: 3306
+    db: yunlu_staging
+    user: test_user
+    password: "test_pass"
+  
+  test_account:
+    phone: "13900139000"
+    code: "654321"
+
+prod:
+  name: 生产环境（只读测试）
+  api:
+    base_url: https://api.yunlu.com
+    timeout: 30
+  
+  app:
+    platform: iOS
+    device_name: iPhone 15 Pro
+    platform_version: 17.2
+    app_path: /path/to/YunluApp.app
+    no_reset: true
+  
+  database:
+    host: prod-db.yunlu.com
+    port: 3306
+    db: yunlu_prod
+    user: read_only_user
+    password: "read_only_pass"
+  
+  test_account:
+    phone: "13700137000"
+    code: "111222"
