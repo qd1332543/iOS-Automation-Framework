@@ -44,83 +44,83 @@ graph TD
 
 ```
 iOS-Automation-Framework/
-├── README.md                      # 项目说明文档
-├── requirements.txt               # Python 依赖
-├── pytest.ini                     # pytest 配置
-├── conftest.py                    # 全局 fixtures
+├── README.md                      # Project documentation
+├── requirements.txt               # Python dependencies
+├── pytest.ini                     # pytest configuration
+├── conftest.py                    # Global fixtures
 │
-├── config/                        # 🔧 配置层
+├── config/                        # Configuration layer
 │   ├── __init__.py
-│   ├── settings.py                # 全局配置
-│   └── environments.yaml          # 多环境配置
+│   ├── settings.py                # Global settings
+│   └── environments.yaml          # Multi-env config
 │
-├── utils/                         # 🛠️ 工具层
+├── utils/                         # Utility layer
 │   ├── __init__.py
-│   ├── log_util.py               # 日志工具
-│   ├── request_util.py           # HTTP 请求工具
-│   ├── assertion_util.py         # 断言工具
-│   ├── db_util.py                # 数据库工具
-│   └── screenshot_util.py        # 截图工具
+│   ├── log_util.py                # Logger
+│   ├── request_util.py            # HTTP client
+│   ├── assertion_util.py          # Assertions
+│   ├── db_util.py                 # Database helper
+│   └── screenshot_util.py         # Screenshot helper
 │
-├── UI_Automation/                 # 📱 UI 自动化 (Appium)
-│   ├── Pages/                    # Page Object 页面对象
+├── UI_Automation/                 # UI tests (Appium)
+│   ├── Pages/                     # Page Object Model
 │   │   ├── __init__.py
-│   │   ├── base_page.py          # 基础页面类
-│   │   ├── login_page.py         # 登录页
-│   │   ├── home_page.py          # 首页
-│   │   ├── category_page.py      # 分类页
-│   │   ├── product_detail_page.py # 商品详情页
-│   │   ├── cart_page.py          # 购物车页
-│   │   └── order_page.py         # 订单页
-│   ├── Tests/                    # UI 测试用例
+│   │   ├── base_page.py           # Base page class
+│   │   ├── login_page.py          # Login page
+│   │   ├── home_page.py           # Home page
+│   │   ├── category_page.py       # Category page
+│   │   ├── product_detail_page.py # Product detail
+│   │   ├── cart_page.py           # Cart page
+│   │   └── order_page.py          # Order page
+│   ├── Tests/                     # UI test cases
 │   │   ├── __init__.py
-│   │   ├── test_login.py         # 登录模块测试
-│   │   ├── test_home.py          # 首页功能测试
-│   │   ├── test_search.py        # 搜索功能测试
-│   │   ├── test_cart.py          # 购物车功能测试
-│   │   └── test_order.py         # 订单流程测试
-│   ├── screenshots/              # 失败截图
-│   └── conftest.py               # UI fixtures
+│   │   ├── test_login.py          # Login tests
+│   │   ├── test_home.py           # Home tests
+│   │   ├── test_search.py         # Search tests
+│   │   ├── test_cart.py           # Cart tests
+│   │   └── test_order.py          # Order flow tests
+│   ├── screenshots/               # Failure screenshots
+│   └── conftest.py                # UI fixtures
 │
-├── API_Automation/                # 🔌 接口自动化
-│   ├── api/                      # API 封装层
+├── API_Automation/                # API tests
+│   ├── api/                       # API wrappers
 │   │   ├── __init__.py
-│   │   ├── base_api.py           # 基础 API 类
-│   │   ├── user_api.py           # 用户模块 API
-│   │   ├── product_api.py        # 商品模块 API
-│   │   ├── cart_api.py           # 购物车 API
-│   │   └── order_api.py          # 订单 API
-│   ├── cases/                    # 接口测试用例
+│   │   ├── base_api.py            # Base API class
+│   │   ├── user_api.py            # User API
+│   │   ├── product_api.py         # Product API
+│   │   ├── cart_api.py            # Cart API
+│   │   └── order_api.py           # Order API
+│   ├── cases/                     # API test cases
 │   │   ├── __init__.py
-│   │   ├── test_user.py          # 用户接口测试
-│   │   ├── test_product.py       # 商品接口测试
-│   │   ├── test_cart.py          # 购物车接口测试
-│   │   └── test_order.py         # 订单接口测试
-│   ├── data/                     # 测试数据
-│   │   ├── user_data.yaml        # 用户测试数据
-│   │   ├── product_data.yaml     # 商品测试数据
-│   │   └── order_data.yaml       # 订单测试数据
+│   │   ├── test_user.py           # User tests
+│   │   ├── test_product.py        # Product tests
+│   │   ├── test_cart.py           # Cart tests
+│   │   └── test_order.py          # Order tests
+│   ├── data/                      # Test data
+│   │   ├── user_data.yaml         # User data
+│   │   ├── product_data.yaml      # Product data
+│   │   └── order_data.yaml        # Order data
 │   └── utils/
-│       └── data_loader.py        # YAML 数据加载器
+│       └── data_loader.py         # YAML data loader
 │
-├── Performance/                   # ⚡ 性能测试
+├── Performance/                   # Performance tests
 │   └── locust_scripts/
 │       ├── __init__.py
-│       ├── locustfile.py         # Locust 性能测试入口
-│       └── api_scenarios.py      # API 压力场景
+│       ├── locustfile.py          # Locust entry point
+│       └── api_scenarios.py       # Load scenarios
 │
-├── CI/                            # 🚀 CI/CD 配置
+├── CI/                            # CI/CD config
 │   ├── jenkins/
-│   │   └── Jenkinsfile           # Jenkins Pipeline
+│   │   └── Jenkinsfile            # Jenkins pipeline
 │   └── fastlane/
-│       └── Fastfile              # Fastlane 配置
+│       └── Fastfile               # Fastlane config
 │
-├── Reports/                       # 📊 测试报告输出
+├── Reports/                       # Test report output
 │   └── .gitkeep
 │
-└── docs/                          # 📖 文档
-    ├── design.md                 # 设计思路文档
-    └── api_interface.md          # API 接口文档
+└── docs/                          # Documentation
+    ├── design.md                  # Design notes
+    └── api_interface.md           # API reference
 ```
 
 ---
