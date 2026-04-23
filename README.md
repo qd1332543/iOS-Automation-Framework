@@ -123,6 +123,16 @@ iOS-Automation-Framework/
     └── api_interface.md           # API reference
 ```
 
+| 目录 | 说明 |
+|------|------|
+| `config/` | 多环境配置，支持 dev / staging / prod |
+| `utils/` | 日志、HTTP、断言、截图等公共工具 |
+| `UI_Automation/` | Appium UI 自动化，Page Object 模式 |
+| `API_Automation/` | 接口自动化，数据与用例分离 |
+| `Performance/` | Locust 性能压测脚本 |
+| `CI/` | Jenkins Pipeline + Fastlane 配置 |
+| `Reports/` | Allure 报告输出目录 |
+
 ---
 
 ## 🚀 快速开始
