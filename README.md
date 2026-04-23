@@ -27,33 +27,15 @@
 
 ## 🏗️ 技术架构
 
-```
-+----------------------------------------------------------+
-|               Test Execution Layer (pytest)              |
-+------------------+------------------+-------------------+
-|  UI_Automation   |  API_Automation  |   Performance     |
-|    (Appium)      |   (Requests)     |    (Locust)       |
-+------------------+------------------+-------------------+
-|  Page Object     |  BaseAPI         |  Scene Scripts    |
-|  Data-Driven     |  Data-Driven     |  Concurrency      |
-|  Screenshot      |  Mock            |  Metrics          |
-+------------------+------------------+-------------------+
-                            |
-+---------------------------+---------------------------------+
-|                   Infrastructure Layer                      |
-|  +----------+  +----------+  +----------+  +----------+   |
-|  | Config   |  | Logger   |  | DB/Cache |  |  Utils   |   |
-|  | MultiEnv |  | LogMgmt  |  | Storage  |  | Helpers  |   |
-|  +----------+  +----------+  +----------+  +----------+   |
-+-------------------------------------------------------------+
-                            |
-+---------------------------+---------------------------------+
-|                      CI/CD Layer                            |
-|  +--------------+  +--------------+  +----------------+   |
-|  | Jenkinsfile  |  |   Fastfile   |  | GitHub Actions |   |
-|  | Pipeline     |  | Build/Sign   |  | Trigger Rules  |   |
-|  +--------------+  +--------------+  +----------------+   |
-+-------------------------------------------------------------+
+```mermaid
+graph TD
+    A[🧪 pytest 测试执行层]
+    A --> B[📱 UI_Automation<br/>Appium + XCUITest]
+    A --> C[🔌 API_Automation<br/>Requests + pytest]
+    A --> D[⚡ Performance<br/>Locust]
+
+    B & C & D --> E[🛠️ 基础设施层<br/>Config / Logger / DB / Utils]
+    E --> F[🚀 CI/CD 层<br/>Jenkins / Fastlane / GitHub Actions]
 ```
 
 ---
