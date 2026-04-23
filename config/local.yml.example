@@ -1,0 +1,17 @@
+# 本地配置文件 - 复制此文件为 local.yml 并填入你的实际配置
+# cp config/local.yml.example config/local.yml
+
+dev:
+  app:
+    device_name: "iPhone 15 Pro"        # 你的模拟器/真机名称
+    platform_version: "17.2"            # iOS 版本
+    app_path: "/path/to/YourApp.app"    # .app 文件路径（模拟器）或 .ipa（真机）
+    udid: ""                            # 真机 UDID，模拟器留空
+
+  appium:
+    url: "http://127.0.0.1:4723"
+
+  test_account:
+    phone: "1xxxxxxxxxx"                # 测试手机号
+    code: "123456"                      # 测试验证码
+    password: "your_password"           # 测试密码

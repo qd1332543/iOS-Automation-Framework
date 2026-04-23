@@ -171,9 +171,9 @@ pip install -r requirements.txt
 npm install -g appium
 appium driver install xcuitest
 
-# 5. 配置环境变量
-cp config/environments.yaml.example config/environments.yaml
-# 编辑 environments.yaml 填入实际配置
+# 5. 配置本地环境
+cp config/local.yml.example config/local.yml
+# 编辑 local.yml，填入你的设备名、App 路径和测试账号
 ```
 
 ### 运行测试
