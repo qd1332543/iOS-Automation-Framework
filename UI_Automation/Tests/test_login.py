@@ -10,11 +10,16 @@
 - 登录后跳转验证
 - 第三方登录入口
 """
+import os
 import allure
 import pytest
 
 from UI_Automation.Pages.login_page import LoginPage
 from UI_Automation.Pages.home_page import HomePage
+
+TEST_PHONE = os.getenv("TEST_PHONE", "13800138000")
+TEST_CODE = os.getenv("TEST_CODE", "123456")
+TEST_PASSWORD = os.getenv("TEST_PASSWORD", "test1234")
 
 
 @allure.feature("用户模块")
@@ -41,10 +46,10 @@ class TestLogin:
             login_page.agree_protocol()
         
         with allure.step("步骤2: 输入手机号"):
-            login_page.input_phone("13800138000")
+            login_page.input_phone(TEST_PHONE)
         
         with allure.step("步骤3: 输入验证码"):
-            login_page.input_code("123456")
+            login_page.input_code(TEST_CODE)
         
         with allure.step("步骤4: 点击登录"):
             home_page = login_page.click_login()
@@ -60,7 +65,7 @@ class TestLogin:
             login_page.switch_to_password_login()
         
         with allure.step("输入手机号和密码"):
-            login_page.input_phone("13800138000").input_password("test1234")
+            login_page.input_phone(TEST_PHONE).input_password(TEST_PASSWORD)
         
         with allure.step("点击登录并验证"):
             home_page = login_page.click_login()
@@ -124,7 +129,7 @@ class TestLogin:
     def test_login_without_agreeing_protocol(self, login_page):
         """不勾选协议直接登录"""
         # 不调用 agree_protocol()
-        login_page.input_phone("13800138000").input_code("123456")
+        login_page.input_phone(TEST_PHONE).input_code(TEST_CODE)
         
         # 尝试登录 - 根据实际 App 行为决定断言
         # 有些 App 会弹出提示，有些直接禁止
