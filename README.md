@@ -28,30 +28,32 @@
 ## 🏗️ 技术架构
 
 ```
-测试执行层 (pytest)
-├── UI_Automation  (Appium)
-│   ├── Page Object 模式
-│   ├── 数据驱动
-│   └── 失败截图
-├── API_Automation  (Requests)
-│   ├── BaseAPI 封装
-│   ├── 数据驱动
-│   └── Mock 处理
-└── Performance  (Locust)
-    ├── 场景模拟脚本
-    ├── 并发控制
-    └── 指标监控
-
-基础设施层
-├── Config    多环境配置
-├── Logger    日志管理
-├── DB/Cache  数据存储
-└── Utils     工具类
-
-CI/CD 层
-├── Jenkinsfile   流水线配置
-├── Fastfile      打包/签名
-└── GitHub Actions 触发规则
++----------------------------------------------------------+
+|               Test Execution Layer (pytest)              |
++------------------+------------------+-------------------+
+|  UI_Automation   |  API_Automation  |   Performance     |
+|    (Appium)      |   (Requests)     |    (Locust)       |
++------------------+------------------+-------------------+
+|  Page Object     |  BaseAPI         |  Scene Scripts    |
+|  Data-Driven     |  Data-Driven     |  Concurrency      |
+|  Screenshot      |  Mock            |  Metrics          |
++------------------+------------------+-------------------+
+                            |
++---------------------------+---------------------------------+
+|                   Infrastructure Layer                      |
+|  +----------+  +----------+  +----------+  +----------+   |
+|  | Config   |  | Logger   |  | DB/Cache |  |  Utils   |   |
+|  | MultiEnv |  | LogMgmt  |  | Storage  |  | Helpers  |   |
+|  +----------+  +----------+  +----------+  +----------+   |
++-------------------------------------------------------------+
+                            |
++---------------------------+---------------------------------+
+|                      CI/CD Layer                            |
+|  +--------------+  +--------------+  +----------------+   |
+|  | Jenkinsfile  |  |   Fastfile   |  | GitHub Actions |   |
+|  | Pipeline     |  | Build/Sign   |  | Trigger Rules  |   |
+|  +--------------+  +--------------+  +----------------+   |
++-------------------------------------------------------------+
 ```
 
 ---
