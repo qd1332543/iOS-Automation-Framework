@@ -1,214 +1,135 @@
-# Jenkins Pipeline 配置
-# iOS Automation Framework - CI/CD 流水线
+// Jenkins Pipeline 配置
+// iOS Automation Framework - CI/CD 流水线
 
 pipeline {
     agent any
-    
+
     environment {
         PYTHON_VERSION = '3.11'
         TEST_ENV = 'staging'
         APPIUM_URL = 'http://127.0.0.1:4723'
     }
-    
+
     options {
         timeout(time: 30, unit: 'MINUTES')
         buildDiscarder(logRotator(numToKeepStr: '10'))
         timestamps()
     }
-    
+
     stages {
-        stage('环境准备')
-        stage('代码检出')
-        stage('依赖安装')
-        stage('接口自动化测试')
-        stage('UI 自动化测试')
-        stage('报告生成')
-        stage('通知')
-    }
-    
-    // ========== 阶段1：环境准备 ==========
-    stage('环境准备') {
-        steps {
-            echo '📋 检查运行环境...'
-            sh '''
-                echo "=== Python 版本 ==="
-                python3 --version || python --version
-                
-                echo "=== Node.js 版本 ==="
-                node --version || echo "Node.js 未安装"
-                
-                echo "=== Appium 版本 ==="
-                appium --version 2>/dev/null || echo "Appium 未安装"
-                
-                echo "=== 系统信息 ==="
-                uname -a
-                df -h .
-                free -h 2>/dev/null || vm_stat | head -5
-            '''
+
+        // ========== 阶段1：环境准备 ==========
+        stage('环境准备') {
+            steps {
+                echo '📋 检查运行环境...'
+                sh '''
+                    python3 --version || python --version
+                    node --version || echo "Node.js 未安装"
+                    appium --version 2>/dev/null || echo "Appium 未安装"
+                    uname -a
+                '''
+            }
         }
-    }
-    
-    // ========== 阶段2：代码检出 ==========
-    stage('代码检出') {
-        steps {
-            checkout scm
-            
-            // 显示 Git 信息
-            sh '''
-                echo "=== Git 提交信息 ==="
-                git log --oneline -5
-                echo ""
-                echo "=== 当前分支 ==="
-                git branch
-                echo ""
-                echo "=== 最近修改的文件 ==="
-                git diff --name-only HEAD~1..HEAD 2>/dev/null || echo "首次提交"
-            '''
+
+        // ========== 阶段2：代码检出 ==========
+        stage('代码检出') {
+            steps {
+                checkout scm
+                sh '''
+                    git log --oneline -5
+                    git branch
+                    git diff --name-only HEAD~1..HEAD 2>/dev/null || echo "首次提交"
+                '''
+            }
         }
-    }
-    
-    // ========== 阶段3：依赖安装 ==========
-    stage('依赖安装') {
-        steps {
-            echo '📦 安装 Python 依赖...'
-            sh '''
-                # 创建虚拟环境
-                if [ ! -d "venv" ]; then
-                    python3 -m venv venv
-                fi
-                source venv/bin/activate
-                
-                # 升级 pip
-                pip install --upgrade pip setuptools wheel
-                
-                # 安装项目依赖
-                pip install -r requirements.txt
-                
-                # 显示已安装包列表
-                pip list --format=columns
-            '''
+
+        // ========== 阶段3：依赖安装 ==========
+        stage('依赖安装') {
+            steps {
+                echo '📦 安装 Python 依赖...'
+                sh '''
+                    if [ ! -d "venv" ]; then
+                        python3 -m venv venv
+                    fi
+                    source venv/bin/activate
+                    pip install --upgrade pip setuptools wheel
+                    pip install -r requirements.txt
+                '''
+            }
         }
-    }
-    
-    // ========== 阶段4：接口自动化测试 ==========
-    stage('接口自动化测试') {
-        steps {
-            echo '🔌 运行接口自动化测试...'
-            sh '''
-                source venv/bin/activate
-                
-                # 设置环境变量（从 Jenkins Credentials 或 Parameters）
-                export TEST_ENV=${TEST_ENV}
-                
-                # 执行接口测试
-                pytest API_Automation/cases/ \
-                    -v \
-                    --tb=short \
-                    --reruns 1 \
-                    --alluredir=./Reports/api-results \
-                    --junitxml=./Reports/junit-api.xml \
-                    2>&1 | tee Reports/api-test-output.log
-            '''
-            
-            // 测试结果归档
-            junit 'Reports/junit-api.xml'
-        }
-        post {
-            always {
-                // 失败时记录但不阻断后续步骤
-                script {
-                    echo '⚠️ 接口测试可能存在失败，继续执行后续阶段'
+
+        // ========== 阶段4：接口自动化测试 ==========
+        stage('接口自动化测试') {
+            steps {
+                echo '🔌 运行接口自动化测试...'
+                sh '''
+                    source venv/bin/activate
+                    mkdir -p Reports
+                    pytest API_Automation/cases/ \
+                        -v --tb=short --reruns 1 \
+                        --alluredir=./Reports/api-results \
+                        --junitxml=./Reports/junit-api.xml \
+                        2>&1 | tee Reports/api-test-output.log
+                '''
+                junit 'Reports/junit-api.xml'
+            }
+            post {
+                failure {
+                    echo '⚠️ 接口测试存在失败，继续执行后续阶段'
                 }
             }
         }
-    }
-    
-    // ========== 阶段5：UI 自动化测试 ==========
-    stage('UI 自动化测试') {
-        steps {
-            echo '📱 运行 UI 自动化测试...'
-            sh '''
-                source venv/bin/activate
-                
-                # 检查 Appium Server 是否可用
-                if curl -s ${APPIUM_URL}/status > /dev/null; then
-                    echo "✅ Appium Server 可用"
-                    
-                    # 执行 UI 测试
-                    pytest UI_Automation/Tests/ \
-                        -v \
-                        --tb=long \
-                        --reruns 1 \
-                        --alluredir=./Reports/ui-results \
-                        --junitxml=./Reports/junit-ui.xml \
-                        --driver-remote-url=${APPIUM_URL} \
-                        2>&1 | tee Reports/ui-test-output.log
-                else
-                    echo "⚠️ Appium Server 未启动，跳过 UI 测试"
-                    echo "创建空的 JUnit 报告..."
+
+        // ========== 阶段5：UI 自动化测试 ==========
+        stage('UI 自动化测试') {
+            steps {
+                echo '📱 运行 UI 自动化测试...'
+                sh '''
+                    source venv/bin/activate
                     mkdir -p Reports
-                    echo '<?xml version="1.0"?><testsuite name="ui-tests" tests="0"></testsuite>' > Reports/junit-ui.xml
-                fi
-            '''
-            
-            junit 'Reports/junit-ui.xml'
-        }
-    }
-    
-    // ========== 阶段6：报告生成 ==========
-    stage('报告生成') {
-        steps {
-            echo '📊 生成 Allure 测试报告...'
-            sh '''
-                # 合并所有 Allure 结果
-                mkdir -p Reports/allure-results-combined
-                if [ -d "Reports/api-results" ]; then
-                    cp -r Reports/api-results/* Reports/allure-results-combined/ 2>/dev/null
-                fi
-                if [ -d "Reports/ui-results" ]; then
-                    cp -r Reports/ui-results/* Reports/allure-results-combined/ 2>/dev/null
-                fi
-                
-                # 生成 Allure HTML 报告
-                allure generate Reports/allure-results-combined \
-                    -o Reports/allure-report \
-                    --clean 2>/dev/null || echo "Allure CLI 不可用，跳过报告生成"
-                
-                # 统计测试结果
-                echo "========== 测试统计 =========="
-                echo "接口测试:"
-                cat Reports/api-test-output.log 2>/dev/null | grep -E "(PASSED|FAILED|ERROR)" | tail -5 || echo "无输出"
-                echo ""
-                echo "UI 测试:"
-                cat Reports/ui-test-output.log 2>/dev/null | grep -E "(PASSED|FAILED|ERROR)" | tail -5 || echo "无输出"
-            '''
-        }
-    }
-    
-    // ========== 阶段7：通知 ==========
-    stage('通知') {
-        steps {
-            script {
-                // 获取构建状态
-                BUILD_STATUS = "${currentBuild.result}"
-                
-                echo "========== 构建通知 =========="
-                echo "构建号: ${BUILD_NUMBER}"
-                echo "构建状态: ${BUILD_STATUS}"
-                echo "触发原因: ${CAUSE}"
-                
-                // 发送钉钉通知（如果配置了 Webhook）
-                // dingtalk(...)
-                
-                // 或发送企业微信通知
-                // wechatwork(...)
+                    if curl -s ${APPIUM_URL}/status > /dev/null; then
+                        pytest UI_Automation/Tests/ \
+                            -v --tb=long --reruns 1 \
+                            --alluredir=./Reports/ui-results \
+                            --junitxml=./Reports/junit-ui.xml \
+                            2>&1 | tee Reports/ui-test-output.log
+                    else
+                        echo "⚠️ Appium Server 未启动，跳过 UI 测试"
+                        echo '<?xml version="1.0"?><testsuite name="ui-tests" tests="0"></testsuite>' > Reports/junit-ui.xml
+                    fi
+                '''
+                junit 'Reports/junit-ui.xml'
             }
         }
-        post {
-            always {
-                // 归档构建产物
-                archiveArtifacts artifacts: 'Reports/**', allowEmptyArchive: true
+
+        // ========== 阶段6：报告生成 ==========
+        stage('报告生成') {
+            steps {
+                echo '📊 生成 Allure 测试报告...'
+                sh '''
+                    mkdir -p Reports/allure-results-combined
+                    [ -d "Reports/api-results" ] && cp -r Reports/api-results/* Reports/allure-results-combined/ 2>/dev/null || true
+                    [ -d "Reports/ui-results" ] && cp -r Reports/ui-results/* Reports/allure-results-combined/ 2>/dev/null || true
+                    allure generate Reports/allure-results-combined \
+                        -o Reports/allure-report --clean 2>/dev/null || echo "Allure CLI 不可用"
+                '''
             }
         }
-    }
-}
+
+        // ========== 阶段7：通知 ==========
+        stage('通知') {
+            steps {
+                script {
+                    echo "构建号: ${BUILD_NUMBER} | 状态: ${currentBuild.currentResult}"
+                    // 可接入钉钉/企业微信 Webhook
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'Reports/**', allowEmptyArchive: true
+                }
+            }
+        }
+
+    } // end stages
+} // end pipeline

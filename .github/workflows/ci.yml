@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  api-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+
+      - name: 运行接口自动化测试
+        run: |
+          pytest API_Automation/cases/ \
+            -v --tb=short --reruns 1 \
+            --alluredir=./Reports/api-results \
+            --junitxml=./Reports/junit-api.xml
+        continue-on-error: true
+
+      - name: 上传测试报告
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-results
+          path: Reports/api-results/
+
+      - name: 发布 JUnit 结果
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: API Test Results
+          path: Reports/junit-api.xml
+          reporter: java-junit
