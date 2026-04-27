@@ -140,9 +140,9 @@ iOS-Automation-Framework/
 ### 环境要求
 
 - **Python**: 3.9+
-- **Node.js**: 16+ (Appium 需要)
+- **Node.js**: 18+ (Appium 2.x 需要)
+- **Appium**: 2.x (`npm install -g appium && appium driver install xcuitest`)
 - **Xcode**: 14+ (iOS 模拟器)
-- **Java**: JDK 11+ (Appium Server)
 
 ### 安装步骤
 
