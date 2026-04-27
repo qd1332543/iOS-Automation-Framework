@@ -11,26 +11,26 @@ class CartPage(BasePage):
     
     # 购物车项
     _CART_ITEM = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeOther[contains(@identifier, 'cart_item')]"
+        AppiumBy.IOS_PREDICATE,
+        "identifier CONTAINS 'cart_item'"
     )
     _CART_ITEM_CHECKBOX = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeSwitch[contains(@identifier, 'item_check')]"
+        AppiumBy.IOS_PREDICATE,
+        "identifier CONTAINS 'item_check' AND type == 'XCUIElementTypeSwitch'"
     )
-    
+
     # 操作
     _ITEM_DELETE = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeButton[contains(@name, '删除')]"
+        AppiumBy.IOS_PREDICATE,
+        "name CONTAINS '删除' AND type == 'XCUIElementTypeButton'"
     )
     _ITEM_QUANTITY_MINUS = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeButton[contains(@identifier, 'minus')]"
+        AppiumBy.IOS_PREDICATE,
+        "identifier CONTAINS 'minus' AND type == 'XCUIElementTypeButton'"
     )
     _ITEM_QUANTITY_PLUS = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeButton[contains(@identifier, 'plus')]"
+        AppiumBy.IOS_PREDICATE,
+        "identifier CONTAINS 'plus' AND type == 'XCUIElementTypeButton'"
     )
     
     # 全选 & 结算
@@ -43,8 +43,8 @@ class CartPage(BasePage):
     
     # 空购物车
     _EMPTY_CART = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeStaticText[@name='购物车是空的' or contains(@name,'空')]"
+        AppiumBy.IOS_PREDICATE,
+        "type == 'XCUIElementTypeStaticText' AND (name == '购物车是空的' OR name CONTAINS '空')"
     )
     
     # 继续购物

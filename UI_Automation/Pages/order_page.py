@@ -13,17 +13,14 @@ class OrderPage(BasePage):
     _ADDRESS_INFO = (AppiumBy.ACCESSIBILITY_ID, "address_info_label")
     
     # 支付方式
-    _PAYMENT_METHOD = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeButton[contains(@name, '{method}')]"
-    )
+    # 支付方式（动态构建，见各 select_*pay 方法）
     _WECHAT_PAY = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeButton[contains(@name, '微信支付') or contains(@name, '微信')]"
+        AppiumBy.IOS_PREDICATE,
+        "type == 'XCUIElementTypeButton' AND (name CONTAINS '微信支付' OR name CONTAINS '微信')"
     )
     _ALI_PAY = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeButton[contains(@name, '支付宝') or contains(@name, 'Alipay')]"
+        AppiumBy.IOS_PREDICATE,
+        "type == 'XCUIElementTypeButton' AND (name CONTAINS '支付宝' OR name CONTAINS 'Alipay')"
     )
     
     # 订单金额
@@ -36,12 +33,12 @@ class OrderPage(BasePage):
     # 订单列表
     _ORDER_LIST = (AppiumBy.ACCESSIBILITY_ID, "order_list")
     _ORDER_ITEM = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeOther[contains(@identifier, 'order_item')]"
+        AppiumBy.IOS_PREDICATE,
+        "identifier CONTAINS 'order_item'"
     )
     _ORDER_STATUS = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeStaticText[contains(@name, 'status')]"
+        AppiumBy.IOS_PREDICATE,
+        "type == 'XCUIElementTypeStaticText' AND name CONTAINS 'status'"
     )
     
     # 订单状态筛选
@@ -110,7 +107,7 @@ class OrderPage(BasePage):
         if orders:
             orders[0].click()  # 进入订单详情
             time.sleep(1)
-            cancel_btn = (AppiumBy.XPATH, "//XCUIElementTypeButton[contains(@name, '取消')]")
+            cancel_btn = (AppiumBy.IOS_PREDICATE, "type == 'XCUIElementTypeButton' AND name CONTAINS '取消'")
             if self.wait_and_check_visible(cancel_btn, timeout=3):
                 self.wait_and_click(cancel_btn)
         return self

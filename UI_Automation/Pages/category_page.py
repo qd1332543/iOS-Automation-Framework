@@ -15,8 +15,8 @@ class CategoryPage(BasePage):
         "left_category_list"
     )
     _CATEGORY_LEFT_ITEM = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeTable//XCUIElementTypeCell"
+        AppiumBy.IOS_CLASS_CHAIN,
+        "**/XCUIElementTypeTable/XCUIElementTypeCell"
     )
     
     # 右侧二级分类 / 商品
@@ -24,39 +24,28 @@ class CategoryPage(BasePage):
         AppiumBy.ACCESSIBILITY_ID,
         "right_content_area"
     )
-    _SUB_CATEGORY = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeStaticText[@name='{name}']"
-    )
+    # 右侧二级分类 / 商品（动态构建，见 select_sub_category 方法）
     _CATEGORY_PRODUCT = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeOther[contains(@identifier, 'category_product')]"
+        AppiumBy.IOS_PREDICATE,
+        "identifier CONTAINS 'category_product'"
     )
     
     # 筛选排序
     _SORT_BTN = (AppiumBy.ACCESSIBILITY_ID, "sort_button")
     _FILTER_BTN = (AppiumBy.ACCESSIBILITY_ID, "filter_button")
     _PRICE_SORT = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeButton[contains(@name, '价格')]"
+        AppiumBy.IOS_PREDICATE,
+        "type == 'XCUIElementTypeButton' AND name CONTAINS '价格'"
     )
     _SALES_SORT = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeButton[contains(@name, '销量')]"
+        AppiumBy.IOS_PREDICATE,
+        "type == 'XCUIElementTypeButton' AND name CONTAINS '销量'"
     )
     
     def select_main_category(self, name: str) -> "CategoryPage":
         """选择左侧一级分类"""
         self.log_step(f"选择一级分类: {name}")
-        locator = (AppiumBy.XPATH, f"//XCUIElementTypeStaticText[@name='{name}']")
-        self.wait_and_click(locator)
-        time.sleep(0.8)
-        return self
-    
-    def select_sub_category(self, name: str) -> "CategoryPage":
-        """选择右侧子分类"""
-        self.log_step(f"选择子分类: {name}")
-        locator = (AppiumBy.XPATH, f"//XCUIElementTypeStaticText[@name='{name}']")
+        locator = (AppiumBy.IOS_PREDICATE, f"type == 'XCUIElementTypeStaticText' AND name == '{name}'")
         self.wait_and_click(locator)
         time.sleep(0.8)
         return self
