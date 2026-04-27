@@ -8,7 +8,6 @@ BasePage - 页面基类（Page Object 模式的核心）
 - 显式等待策略
 """
 import os
-import time
 from typing import List, Optional, Tuple, Union
 
 from appium import webdriver
@@ -125,8 +124,6 @@ class BasePage:
             # 尝试使用 JavaScript 点击（解决 iOS 偶发点击失败问题）
             self.logger.debug("尝试 JS Click...")
             self.driver.execute_script("arguments[0].click();", element)
-        
-        time.sleep(0.3)  # 短暂等待 UI 响应
         return self
     
     def wait_and_input(
@@ -154,13 +151,11 @@ class BasePage:
         self.logger.info(f"⌨️  {desc}")
         
         element = self._find_element(locator, timeout)
-        
+
         if clear_first:
             element.clear()
-            time.sleep(0.2)
-        
+
         element.send_keys(text)
-        time.sleep(0.3)
         return self
     
     def wait_and_get_text(
@@ -197,7 +192,6 @@ class BasePage:
         
         self.driver.swipe(start_x, start_y, start_x, end_y, duration)
         self.logger.debug("👆 向上滑动")
-        time.sleep(0.5)
         return self
     
     def swipe_down(self, duration: int = 800):
@@ -209,7 +203,6 @@ class BasePage:
         
         self.driver.swipe(start_x, start_y, start_x, end_y, duration)
         self.logger.debug("👇 向下滑动")
-        time.sleep(0.5)
         return self
     
     def swipe_left(self, duration: int = 500):
@@ -221,7 +214,6 @@ class BasePage:
         
         self.driver.swipe(start_x, y, end_x, y, duration)
         self.logger.debug("⬅️ 向左滑动")
-        time.sleep(0.5)
         return self
     
     def tap_by_coordinate(self, x: int, y: int):
@@ -230,7 +222,6 @@ class BasePage:
         action = TouchAction(self.driver)
         action.tap(x=x, y=y).perform()
         self.logger.debug(f"👆 坐标点击 ({x}, {y})")
-        time.sleep(0.3)
         return self
     
     # ==================== 等待方法 ====================
@@ -251,10 +242,14 @@ class BasePage:
             return False
     
     def wait_for_page_load(self, timeout: int = 10):
-        """等待页面加载完成（通过判断 activity）"""
-        # iOS 上可以检查当前 bundle identifier 或 page source 变化
-        time.sleep(1)  # 最小等待
-        # 实际场景中可以根据具体 App 特征来判断
+        """等待页面加载完成"""
+        try:
+            WebDriverWait(self.driver, timeout, self.POLL_FREQUENCY).until(
+                lambda d: d.execute_script("return document.readyState") == "complete"
+                or len(d.find_elements("xpath", "//*")) > 0
+            )
+        except Exception:
+            pass
         self.logger.debug("⏳ 等待页面加载")
     
     def custom_wait(self, condition, timeout: int = DEFAULT_TIMEOUT):
