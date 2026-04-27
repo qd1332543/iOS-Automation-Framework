@@ -67,12 +67,16 @@ class CartPage(BasePage):
     def delete_first_item(self) -> "CartPage":
         """删除第一个商品"""
         self.log_step("删除第一个商品")
-        items = self._find_elements(_CART_ITEM, timeout=5)
+        items = self._find_elements(self._CART_ITEM, timeout=5)
         if items:
             # 先左滑显示删除按钮
             item = items[0]
             size = item.size
-            item.swipe(size["width"], size["height"]/2, 0, size["height"]/2, 500)
+            location = item.location
+            start_x = location["x"] + size["width"] * 0.8
+            end_x = location["x"] + size["width"] * 0.2
+            y = location["y"] + size["height"] / 2
+            self.driver.swipe(start_x, y, end_x, y, 500)
             time.sleep(0.5)
             self.wait_and_click(self._ITEM_DELETE)
             time.sleep(0.5)
