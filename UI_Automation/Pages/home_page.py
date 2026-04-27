@@ -45,11 +45,11 @@ class HomePage(BasePage):
     _PRODUCT_LIST = (AppiumBy.ACCESSIBILITY_ID, "home_product_list")
     _PRODUCT_ITEM = (
         AppiumBy.IOS_PREDICATE,
-        "identifier CONTAINS 'product_item'"
+        "type == 'XCUIElementTypeOther' AND identifier CONTAINS 'product_item'"
     )
     _PRODUCT_CARD = (
         AppiumBy.IOS_PREDICATE,
-        "identifier CONTAINS 'goods_card'"
+        "type == 'XCUIElementTypeOther' AND identifier CONTAINS 'goods_card'"
     )
     
     # 下拉刷新控件
@@ -104,7 +104,7 @@ class HomePage(BasePage):
         self.log_step(f"点击分类: {category_name}")
         locator = (
             AppiumBy.IOS_PREDICATE,
-            f"type == 'XCUIElementTypeStaticText' AND (name == '{category_name}' OR value == '{category_name}')"
+            f"type == 'XCUIElementTypeStaticText' AND (name == '{self._predicate_escape(category_name)}' OR value == '{self._predicate_escape(category_name)}')"
         )
         self.wait_and_click(locator)
         return CategoryPage(self.driver)
