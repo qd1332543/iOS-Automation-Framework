@@ -23,59 +23,59 @@ class LoginPage(BasePage):
     _PHONE_INPUT = (AppiumBy.ACCESSIBILITY_ID, "phone_number_text_field")
     # 备选 XPath
     _PHONE_INPUT_XPATH = (
-        AppiumBy.XPATH, 
-        "//XCUIElementTypeTextField[@name='请输入手机号' or @placeholder='请输入手机号']"
+        AppiumBy.IOS_PREDICATE,
+        "type == 'XCUIElementTypeTextField' AND (name == '请输入手机号' OR placeholder == '请输入手机号')"
     )
-    
-    # 验证码输入框  
+
+    # 验证码输入框
     _CODE_INPUT = (AppiumBy.ACCESSIBILITY_ID, "verification_code_text_field")
     _CODE_INPUT_XPATH = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeTextField[@name='请输入验证码' or @placeholder='请输入验证码']"
+        AppiumBy.IOS_PREDICATE,
+        "type == 'XCUIElementTypeTextField' AND (name == '请输入验证码' OR placeholder == '请输入验证码')"
     )
-    
+
     # 获取验证码按钮
     _GET_CODE_BTN = (AppiumBy.ACCESSIBILITY_ID, "get_verification_code_button")
     _GET_CODE_BTN_XPATH = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeButton[@name='获取验证码']"
+        AppiumBy.IOS_PREDICATE,
+        "type == 'XCUIElementTypeButton' AND name == '获取验证码'"
     )
-    
+
     # 登录按钮
     _LOGIN_BUTTON = (AppiumBy.ACCESSIBILITY_ID, "login_button")
     _LOGIN_BUTTON_XPATH = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeButton[@name='登录']"
+        AppiumBy.IOS_PREDICATE,
+        "type == 'XCUIElementTypeButton' AND name == '登录'"
     )
-    
+
     # 用户协议勾选框
     _AGREE_CHECKBOX = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeSwitch[@name='agree_switch']"
+        AppiumBy.IOS_PREDICATE,
+        "type == 'XCUIElementTypeSwitch' AND name == 'agree_switch'"
     )
-    
+
     # 密码登录切换
     _PASSWORD_LOGIN_TAB = (
         AppiumBy.ACCESSIBILITY_ID,
         "password_login_tab"
     )
-    
+
     # 密码输入框
     _PASSWORD_INPUT = (
         AppiumBy.ACCESSIBILITY_ID,
         "password_text_field"
     )
-    
+
     # 微信登录按钮
     _WECHAT_LOGIN_BTN = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeButton[contains(@name, '微信')]"
+        AppiumBy.IOS_PREDICATE,
+        "type == 'XCUIElementTypeButton' AND name CONTAINS '微信'"
     )
-    
+
     # Apple 登录按钮
     _APPLE_LOGIN_BTN = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeButton[@value='Sign in with Apple' or contains(@name, 'Apple')]"
+        AppiumBy.IOS_PREDICATE,
+        "type == 'XCUIElementTypeButton' AND (value == 'Sign in with Apple' OR name CONTAINS 'Apple')"
     )
     
     # ========== 业务操作 ==========

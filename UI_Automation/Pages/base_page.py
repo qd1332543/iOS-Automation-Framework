@@ -270,3 +270,10 @@ class BasePage:
     def log_step(self, message: str):
         """记录操作步骤到日志"""
         self.logger.info(f"📍 [步骤] {message}")
+
+    # ==================== 工具方法 ====================
+
+    @staticmethod
+    def _predicate_escape(value: str) -> str:
+        """转义 IOS_PREDICATE 字符串中的单引号"""
+        return value.replace("'", "\\'")

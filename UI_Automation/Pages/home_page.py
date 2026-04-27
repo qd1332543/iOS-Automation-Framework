@@ -25,35 +25,31 @@ class HomePage(BasePage):
     # Banner 区域
     _BANNER_CONTAINER = (AppiumBy.ACCESSIBILITY_ID, "home_banner_view")
     _BANNER_INDICATOR = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypePageIndicator"
+        AppiumBy.IOS_PREDICATE,
+        "type == 'XCUIElementTypePageIndicator'"
     )
     
     # 搜索框
     _SEARCH_BAR = (AppiumBy.ACCESSIBILITY_ID, "home_search_bar")
     _SEARCH_BAR_XPATH = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeSearchField[@name='搜索商品']"
+        AppiumBy.IOS_PREDICATE,
+        "type == 'XCUIElementTypeSearchField' AND name == '搜索商品'"
     )
     
     # 分类图标区域（横向滚动的分类入口）
     _CATEGORY_ICON_AREA = (AppiumBy.ACCESSIBILITY_ID, "category_icon_scroll")
     
-    # 具体分类图标
-    _CATEGORY_ICON_TEMPLATE = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeImage[@name='{category_name}']/parent::*/preceding-sibling::* | //XCUIElementTypeStaticText[@name='{category_name}']"
-    )
+    # 具体分类图标（动态构建，见 tap_category 方法）
     
     # 商品列表区域
     _PRODUCT_LIST = (AppiumBy.ACCESSIBILITY_ID, "home_product_list")
     _PRODUCT_ITEM = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeOther[contains(@label, 'product_item')]"
+        AppiumBy.IOS_PREDICATE,
+        "type == 'XCUIElementTypeOther' AND identifier CONTAINS 'product_item'"
     )
     _PRODUCT_CARD = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeOther[contains(@identifier, 'goods_card')]"
+        AppiumBy.IOS_PREDICATE,
+        "type == 'XCUIElementTypeOther' AND identifier CONTAINS 'goods_card'"
     )
     
     # 下拉刷新控件
@@ -70,8 +66,8 @@ class HomePage(BasePage):
     
     # 首页通知/活动弹窗（可能存在）
     _POPUP_CLOSE_BTN = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeButton[@name='close' or @name='关闭' or @name='我知道了']"
+        AppiumBy.IOS_PREDICATE,
+        "type == 'XCUIElementTypeButton' AND (name == 'close' OR name == '关闭' OR name == '我知道了')"
     )
     
     # ========== 业务操作 ==========
@@ -107,8 +103,8 @@ class HomePage(BasePage):
         """
         self.log_step(f"点击分类: {category_name}")
         locator = (
-            AppiumBy.XPATH,
-            f"//XCUIElementTypeStaticText[@name='{category_name}' or @value='{category_name}']"
+            AppiumBy.IOS_PREDICATE,
+            f"type == 'XCUIElementTypeStaticText' AND (name == '{self._predicate_escape(category_name)}' OR value == '{self._predicate_escape(category_name)}')"
         )
         self.wait_and_click(locator)
         return CategoryPage(self.driver)

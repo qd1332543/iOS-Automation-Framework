@@ -12,8 +12,8 @@ class ProductDetailPage(BasePage):
     # 商品图片轮播
     _IMAGE_BANNER = (AppiumBy.ACCESSIBILITY_ID, "product_image_gallery")
     _IMAGE_INDICATOR = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypePageIndicator"
+        AppiumBy.IOS_PREDICATE,
+        "type == 'XCUIElementTypePageIndicator'"
     )
     
     # 商品信息
@@ -24,14 +24,6 @@ class ProductDetailPage(BasePage):
     
     # 规格选择
     _SPEC_SELECTOR = (AppiumBy.ACCESSIBILITY_ID, "spec_selector")
-    _SPEC_OPTION = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeButton[contains(@name, '{spec}')]"
-    )
-    _SIZE_OPTION = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeButton[contains(@name, '{size}')]"
-    )
     
     # 数量选择
     _QUANTITY_MINUS = (AppiumBy.ACCESSIBILITY_ID, "quantity_minus")
@@ -58,7 +50,7 @@ class ProductDetailPage(BasePage):
     def select_spec(self, spec: str) -> "ProductDetailPage":
         """选择规格"""
         self.log_step(f"选择规格: {spec}")
-        locator = (AppiumBy.XPATH, f"//XCUIElementTypeButton[contains(@name, '{spec}')]")
+        locator = (AppiumBy.IOS_PREDICATE, f"type == 'XCUIElementTypeButton' AND name CONTAINS '{self._predicate_escape(spec)}'")
         self.wait_and_click(locator)
         time.sleep(0.3)
         return self
@@ -66,7 +58,7 @@ class ProductDetailPage(BasePage):
     def select_size(self, size: str) -> "ProductDetailPage":
         """选择尺寸"""
         self.log_step(f"选择尺码: {size}")
-        locator = (AppiumBy.XPATH, f"//XCUIElementTypeButton[contains(@name, '{size}')]")
+        locator = (AppiumBy.IOS_PREDICATE, f"type == 'XCUIElementTypeButton' AND name CONTAINS '{self._predicate_escape(size)}'")
         self.wait_and_click(locator)
         time.sleep(0.3)
         return self

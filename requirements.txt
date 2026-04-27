@@ -1,49 +1,45 @@
 # iOS Automation Framework - Python Dependencies
 # ============================================
+# Requires: Python 3.9+, Appium 2.x, Xcode 14+
 
 # HTTP Requests
-requests>=2.31.0
+requests~=2.33.1
 
-# Appium Client
-Appium-Python-Client>=3.0.0
+# Appium Client (requires Appium 2.x server)
+Appium-Python-Client==5.3.1
 
 # Testing Framework
-pytest>=7.4.0
-pytest-html>=3.2.0
-pytest-xdist>=3.5.0
-pytest-rerunfailures>=12.0
-pytest-base-url>=2.0
+pytest~=9.0.3
+pytest-html~=4.1.1
+pytest-xdist~=3.8.0
+pytest-rerunfailures~=16.1
+pytest-base-url~=2.1.0
 
 # Allure Report
-allure-pytest>=2.13.0
+allure-pytest~=2.16.0
 
 # Data Processing
-PyYAML>=6.0
-jsonpath-ng>=1.6.0
+PyYAML~=6.0.3
+jsonpath-ng~=1.7.0
 
 # Mock & Test Utilities
-responses>=0.23.0
-pytest-mock>=3.11.0
-faker>=19.0.0
+responses~=0.25.7
+pytest-mock~=3.14.1
+faker~=37.3.0
 
 # Logging & Utils
-loguru>=0.7.0
-colorama>=0.4.6
+loguru~=0.7.3
+colorama~=0.4.6
 
 # Performance Testing
-locust>=2.20.0
+locust~=2.43.4
 
 # Code Quality
-black>=23.0.0
-flake8>=6.1.0
+black~=25.1.0
+flake8~=7.2.0
 
 # Configuration
-python-dotenv>=1.0.0
-configparser>=5.3.0
-
-# Async Support
-aiohttp>=3.8.0
-asyncio-pool>=0.6.0
+python-dotenv~=1.1.0
 
 # Screenshot & Image
-Pillow>=10.0.0
+Pillow~=11.2.1

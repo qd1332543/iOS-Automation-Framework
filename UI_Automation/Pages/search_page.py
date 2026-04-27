@@ -12,8 +12,8 @@ class SearchPage(BasePage):
     # 元素定位
     _SEARCH_INPUT = (AppiumBy.ACCESSIBILITY_ID, "search_input_field")
     _SEARCH_INPUT_XPATH = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeSearchField"
+        AppiumBy.IOS_PREDICATE,
+        "type == 'XCUIElementTypeSearchField'"
     )
     _SEARCH_BTN = (AppiumBy.ACCESSIBILITY_ID, "search_button")
     _CANCEL_BTN = (AppiumBy.ACCESSIBILITY_ID, "cancel_button")
@@ -22,22 +22,18 @@ class SearchPage(BasePage):
     # 搜索结果
     _RESULT_LIST = (AppiumBy.ACCESSIBILITY_ID, "search_result_list")
     _RESULT_EMPTY_TIPS = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeStaticText[@name='没有找到相关商品' or contains(@name, '暂无')]"
+        AppiumBy.IOS_PREDICATE,
+        "type == 'XCUIElementTypeStaticText' AND (name == '没有找到相关商品' OR name CONTAINS '暂无')"
     )
     _RESULT_ITEM = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeOther[contains(@identifier, 'result_product')]"
+        AppiumBy.IOS_PREDICATE,
+        "type == 'XCUIElementTypeOther' AND identifier CONTAINS 'result_product'"
     )
-    
-    # 搜索历史/热搜
-    _HISTORY_TAG = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeStaticText[@name='{keyword}']"
-    )
+
+    # 搜索历史/热搜（动态构建，见各方法）
     _HOT_SEARCH_KEYWORDS = (
-        AppiumBy.XPATH,
-        "//XCUIElementTypeCollectionView[@identifier='hot_search_list']"
+        AppiumBy.IOS_PREDICATE,
+        "type == 'XCUIElementTypeCollectionView' AND identifier == 'hot_search_list'"
     )
 
     def input_keyword(self, keyword: str) -> "SearchPage":
