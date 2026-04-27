@@ -27,7 +27,7 @@ class SearchPage(BasePage):
     )
     _RESULT_ITEM = (
         AppiumBy.IOS_PREDICATE,
-        "identifier CONTAINS 'result_product'"
+        "type == 'XCUIElementTypeOther' AND identifier CONTAINS 'result_product'"
     )
 
     # 搜索历史/热搜（动态构建，见各方法）

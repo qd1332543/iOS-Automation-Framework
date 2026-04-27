@@ -50,7 +50,7 @@ class ProductDetailPage(BasePage):
     def select_spec(self, spec: str) -> "ProductDetailPage":
         """选择规格"""
         self.log_step(f"选择规格: {spec}")
-        locator = (AppiumBy.IOS_PREDICATE, f"type == 'XCUIElementTypeButton' AND name CONTAINS '{spec}'")
+        locator = (AppiumBy.IOS_PREDICATE, f"type == 'XCUIElementTypeButton' AND name CONTAINS '{self._predicate_escape(spec)}'")
         self.wait_and_click(locator)
         time.sleep(0.3)
         return self
@@ -58,7 +58,7 @@ class ProductDetailPage(BasePage):
     def select_size(self, size: str) -> "ProductDetailPage":
         """选择尺寸"""
         self.log_step(f"选择尺码: {size}")
-        locator = (AppiumBy.IOS_PREDICATE, f"type == 'XCUIElementTypeButton' AND name CONTAINS '{size}'")
+        locator = (AppiumBy.IOS_PREDICATE, f"type == 'XCUIElementTypeButton' AND name CONTAINS '{self._predicate_escape(size)}'")
         self.wait_and_click(locator)
         time.sleep(0.3)
         return self

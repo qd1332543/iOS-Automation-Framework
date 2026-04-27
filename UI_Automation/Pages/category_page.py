@@ -27,7 +27,7 @@ class CategoryPage(BasePage):
     # 右侧二级分类 / 商品（动态构建，见 select_sub_category 方法）
     _CATEGORY_PRODUCT = (
         AppiumBy.IOS_PREDICATE,
-        "identifier CONTAINS 'category_product'"
+        "type == 'XCUIElementTypeOther' AND identifier CONTAINS 'category_product'"
     )
     
     # 筛选排序
@@ -45,7 +45,7 @@ class CategoryPage(BasePage):
     def select_main_category(self, name: str) -> "CategoryPage":
         """选择左侧一级分类"""
         self.log_step(f"选择一级分类: {name}")
-        locator = (AppiumBy.IOS_PREDICATE, f"type == 'XCUIElementTypeStaticText' AND name == '{name}'")
+        locator = (AppiumBy.IOS_PREDICATE, f"type == 'XCUIElementTypeStaticText' AND name == '{self._predicate_escape(name)}'")
         self.wait_and_click(locator)
         time.sleep(0.8)
         return self
