@@ -124,7 +124,7 @@ class TestUserLogin:
 
 
 @allure.feature("用户模块")
-@allue.story("用户信息")
+@allure.story("用户信息")
 class TestUserInfo:
     """用户信息接口测试"""
     
@@ -133,8 +133,8 @@ class TestUserInfo:
         self.user_api = UserAPI(request_util)
         self.token = login_token
     
-    @allue.title("获取当前用户信息")
-    @allue.severity(allure.severity_level.CRITICAL)
+    @allure.title("获取当前用户信息")
+    @allure.severity(allure.severity_level.CRITICAL)
     @pytest.mark.smoke
     def test_get_user_info(self):
         with allure.step("获取用户详情"):
@@ -153,8 +153,8 @@ class TestUserInfo:
                 attachment_type=allure.attachment_type.JSON
             )
     
-    @allue.title("修改昵称")
-    @allue.severity(allure.severity_level.NORMAL)
+    @allure.title("修改昵称")
+    @allure.severity(allure.severity_level.NORMAL)
     def test_update_nickname(self):
         new_name = f"AutoTest_{__import__('time').strftime('%H%M%S')}"
         

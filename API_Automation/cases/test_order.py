@@ -6,7 +6,7 @@ from utils.assertion_util import AssertUtil
 
 
 @allure.feature("订单模块")
-@allue.story("订单管理")
+@allure.story("订单管理")
 class TestOrder:
     """订单接口测试"""
     
@@ -15,8 +15,8 @@ class TestOrder:
         self.order_api = OrderAPI(request_util)
         self.token = login_token
     
-    @allue.title("获取订单列表")
-    @allue.severity(allure.severity_level.CRITICAL)
+    @allure.title("获取订单列表")
+    @allure.severity(allure.severity_level.CRITICAL)
     @pytest.mark.smoke
     def test_get_order_list(self):
         with allure.step("获取全部订单"):
@@ -31,8 +31,8 @@ class TestOrder:
             attachment_type=allure.attachment_type.TEXT
         )
     
-    @allue.title("按状态筛选订单")
-    @allue.severity(allure.severity_level.NORMAL)
+    @allure.title("按状态筛选订单")
+    @allure.severity(allure.severity_level.NORMAL)
     @pytest.mark.parametrize("status", ["pending", "shipping", "completed", "cancelled"])
     def test_filter_order_by_status(self, status):
         with allure.step(f"筛选状态: {status}"):
