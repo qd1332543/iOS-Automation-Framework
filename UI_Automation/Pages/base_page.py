@@ -183,46 +183,36 @@ class BasePage:
             return False
     
     # ==================== 手势操作 ====================
-    
-    def swipe_up(self, duration: int = 800):
-        """向上滑动（内容向下滚动）"""
-        size = self.driver.get_window_size()
-        start_x = int(size["width"] / 2)
-        start_y = int(size["height"] * 0.7)
-        end_y = int(size["height"] * 0.3)
+
+    def _drag(self, from_x: int, from_y: int, to_x: int, to_y: int, duration_ms: int):
+        """执行 W3C drag 手势（内部 helper）"""
         self.driver.execute_script("mobile: dragFromToForDuration", {
-            "duration": duration / 1000,
-            "fromX": start_x, "fromY": start_y,
-            "toX": start_x, "toY": end_y
+            "duration": duration_ms / 1000,
+            "fromX": from_x, "fromY": from_y,
+            "toX": to_x, "toY": to_y
         })
+
+    def swipe_up(self, duration_ms: int = 800):
+        """向上滑动（内容向下滚动）。duration_ms 单位为毫秒"""
+        size = self.driver.get_window_size()
+        x = int(size["width"] / 2)
+        self._drag(x, int(size["height"] * 0.7), x, int(size["height"] * 0.3), duration_ms)
         self.logger.debug("👆 向上滑动")
         return self
-    
-    def swipe_down(self, duration: int = 800):
-        """向下滑动（内容向上滚动）"""
+
+    def swipe_down(self, duration_ms: int = 800):
+        """向下滑动（内容向上滚动）。duration_ms 单位为毫秒"""
         size = self.driver.get_window_size()
-        start_x = int(size["width"] / 2)
-        start_y = int(size["height"] * 0.3)
-        end_y = int(size["height"] * 0.7)
-        self.driver.execute_script("mobile: dragFromToForDuration", {
-            "duration": duration / 1000,
-            "fromX": start_x, "fromY": start_y,
-            "toX": start_x, "toY": end_y
-        })
+        x = int(size["width"] / 2)
+        self._drag(x, int(size["height"] * 0.3), x, int(size["height"] * 0.7), duration_ms)
         self.logger.debug("👇 向下滑动")
         return self
-    
-    def swipe_left(self, duration: int = 500):
-        """向左滑动"""
+
+    def swipe_left(self, duration_ms: int = 500):
+        """向左滑动。duration_ms 单位为毫秒"""
         size = self.driver.get_window_size()
-        start_x = int(size["width"] * 0.8)
-        end_x = int(size["width"] * 0.2)
         y = int(size["height"] / 2)
-        self.driver.execute_script("mobile: dragFromToForDuration", {
-            "duration": duration / 1000,
-            "fromX": start_x, "fromY": y,
-            "toX": end_x, "toY": y
-        })
+        self._drag(int(size["width"] * 0.8), y, int(size["width"] * 0.2), y, duration_ms)
         self.logger.debug("⬅️ 向左滑动")
         return self
     
@@ -262,7 +252,7 @@ class BasePage:
             True 表示加载成功，False 表示超时
         """
         self.logger.debug("⏳ 等待页面加载")
-        wait_condition = condition or (lambda d: len(d.find_elements("xpath", "//*")) > 1)
+        wait_condition = condition or (lambda d: len(d.page_source) > 100)
         try:
             WebDriverWait(self.driver, timeout, self.POLL_FREQUENCY).until(wait_condition)
             self.logger.debug("✅ 页面加载完成")
