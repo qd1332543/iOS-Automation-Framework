@@ -73,9 +73,9 @@ class CartPage(BasePage):
             item = items[0]
             size = item.size
             location = item.location
-            start_x = location["x"] + size["width"] * 0.8
-            end_x = location["x"] + size["width"] * 0.2
-            y = location["y"] + size["height"] / 2
+            start_x = int(location["x"] + size["width"] * 0.8)
+            end_x = int(location["x"] + size["width"] * 0.2)
+            y = int(location["y"] + size["height"] / 2)
             self.driver.swipe(start_x, y, end_x, y, 500)
             time.sleep(0.5)
             self.wait_and_click(self._ITEM_DELETE)
