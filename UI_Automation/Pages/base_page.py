@@ -190,6 +190,11 @@ class BasePage:
         注意：仅支持 iOS XCUITest driver，使用 mobile: dragFromToForDuration 命令。
         duration_ms 单位为毫秒，内部转换为秒传给 Appium。
         """
+        platform = self.driver.capabilities.get("platformName", "").lower()
+        if platform != "ios":
+            raise RuntimeError(
+                f"_drag 仅支持 iOS XCUITest driver，当前平台: {platform}"
+            )
         self.driver.execute_script("mobile: dragFromToForDuration", {
             "duration": duration_ms / 1000,
             "fromX": from_x, "fromY": from_y,
@@ -263,6 +268,8 @@ class BasePage:
             )
         """
         self.logger.debug("⏳ 等待页面加载")
+        if condition is None:
+            self.logger.warning("⚠️ wait_for_page_load 未传入 condition，使用通用默认条件，建议传入页面特定的等待条件")
         wait_condition = condition or (lambda d: len(d.page_source) > 100)
         try:
             WebDriverWait(self.driver, timeout, self.POLL_FREQUENCY).until(wait_condition)
