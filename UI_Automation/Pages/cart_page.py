@@ -72,16 +72,13 @@ class CartPage(BasePage):
         items = self._find_elements(self._CART_ITEM, timeout=5)
         if items:
             item = items[0]
+            self.driver.execute_script("mobile: scroll", {"element": item, "toVisible": True})
             size = item.size
             location = item.location
             start_x = int(location["x"] + size["width"] * self._SWIPE_START_RATIO)
             end_x = int(location["x"] + size["width"] * self._SWIPE_END_RATIO)
             y = int(location["y"] + size["height"] / 2)
-            self.driver.execute_script("mobile: dragFromToForDuration", {
-                "duration": self._SWIPE_DURATION_SECONDS,
-                "fromX": start_x, "fromY": y,
-                "toX": end_x, "toY": y
-            })
+            self._drag(start_x, y, end_x, y, int(self._SWIPE_DURATION_SECONDS * 1000))
             self.wait_and_click(self._ITEM_DELETE)
         return self
     
