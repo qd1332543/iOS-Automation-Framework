@@ -96,7 +96,7 @@ class LogUtil:
 
 
 # 导出便捷函数
-def get_logger(name: str = None) -> LogUtil.get_logger(name):
+def get_logger(name: str = None) -> "LogUtil":
     """获取 Logger 的快捷方式"""
     return LogUtil.get_logger(name)
 
