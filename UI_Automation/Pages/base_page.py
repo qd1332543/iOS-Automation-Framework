@@ -1,6 +1,9 @@
 """
 BasePage - 页面基类（Page Object 模式的核心）
 
+本框架专为 iOS + XCUITest 设计，不支持 Android 或其他平台。
+所有手势操作均基于 Appium mobile: 扩展命令。
+
 封装了所有通用的页面操作：
 - 元素定位与等待
 - 点击、输入、滑动
@@ -23,14 +26,15 @@ from utils.screenshot_util import ScreenshotUtil
 
 class BasePage:
     """
-    Page Object 基类
-    
+    Page Object 基类（仅支持 iOS + XCUITest）
+
     所有页面的父类，提供：
     1. 统一的元素操作方法（wait_and_click, wait_and_input 等）
-    2. 多种元素定位策略自动切换
-    3. 显式等待机制
-    4. 自动失败截图
-    5. 操作日志记录
+    2. 显式等待机制
+    3. 自动失败截图
+    4. 操作日志记录
+
+    注意：手势操作（swipe_*）依赖 Appium mobile: 扩展命令，仅适用于 iOS XCUITest driver。
     """
     
     # 默认超时时间（秒）
@@ -185,16 +189,11 @@ class BasePage:
     # ==================== 手势操作 ====================
 
     def _drag(self, from_x: int, from_y: int, to_x: int, to_y: int, duration_ms: int):
-        """执行 W3C drag 手势（内部 helper）
+        """执行 drag 手势（内部 helper）
 
-        注意：仅支持 iOS XCUITest driver，使用 mobile: dragFromToForDuration 命令。
+        使用 Appium mobile: dragFromToForDuration 命令。
         duration_ms 单位为毫秒，内部转换为秒传给 Appium。
         """
-        platform = self.driver.capabilities.get("platformName", "").lower()
-        if platform != "ios":
-            raise RuntimeError(
-                f"_drag 仅支持 iOS XCUITest driver，当前平台: {platform}"
-            )
         self.driver.execute_script("mobile: dragFromToForDuration", {
             "duration": duration_ms / 1000,
             "fromX": from_x, "fromY": from_y,
@@ -250,29 +249,20 @@ class BasePage:
             self.logger.warning(f"⏰ 文本未出现: {text}")
             return False
     
-    def wait_for_page_load(self, condition=None, timeout: int = 10) -> bool:
+    def wait_for_page_load(self, condition, timeout: int = 10) -> bool:
         """等待页面加载完成
 
         Args:
-            condition: 自定义等待条件（lambda driver: bool）。
-                强烈建议调用方传入页面特定的条件（如等待某个关键元素出现），
-                默认条件仅检查 page_source 长度，可能在某些页面产生误判。
+            condition: 等待条件（lambda driver: bool），必须传入页面特定的条件。
+                例如：lambda d: d.find_elements(AppiumBy.ACCESSIBILITY_ID, "home_title")
             timeout: 超时时间（秒）
 
         Returns:
             True 表示加载成功，False 表示超时
-
-        Example:
-            page.wait_for_page_load(
-                condition=lambda d: d.find_elements(AppiumBy.ACCESSIBILITY_ID, "home_title")
-            )
         """
         self.logger.debug("⏳ 等待页面加载")
-        if condition is None:
-            self.logger.warning("⚠️ wait_for_page_load 未传入 condition，使用通用默认条件，建议传入页面特定的等待条件")
-        wait_condition = condition or (lambda d: len(d.page_source) > 100)
         try:
-            WebDriverWait(self.driver, timeout, self.POLL_FREQUENCY).until(wait_condition)
+            WebDriverWait(self.driver, timeout, self.POLL_FREQUENCY).until(condition)
             self.logger.debug("✅ 页面加载完成")
             return True
         except TimeoutException:
