@@ -1,6 +1,6 @@
 # 🧪 iOS-Automation-Framework
 
-> **基于云鹿商城的移动端自动化测试框架** | Appium + pytest + Allure + Jenkins CI/CD
+> **基于云鹿商城的移动端自动化测试框架** | Appium + pytest + Allure + GitHub Actions
 
 ![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
 ![Framework](https://img.shields.io/badge/Framework-Appium+pytest-green.svg)
@@ -20,7 +20,7 @@
 | 📊 **数据驱动测试** | YAML 管理测试数据，支持多环境切换 |
 | 🔌 **接口/UI 联动** | 统一框架同时支持 API 和 UI 测试 |
 | 📈 **Allure 报告** | 可视化测试报告，支持历史趋势 |
-| 🔄 **Jenkins CI/CD** | 自动化流水线，每日构建执行 |
+| 🔄 **GitHub Actions CI** | 自动化流水线，PR 触发执行 |
 | ⚡ **性能测试** | 基于 Locust 的压力测试脚本 |
 
 ---
@@ -34,8 +34,8 @@ graph TD
     A --> C[🔌 API_Automation<br/>Requests + pytest]
     A --> D[⚡ Performance<br/>Locust]
 
-    B & C & D --> E[🛠️ 基础设施层<br/>Config / Logger / DB / Utils]
-    E --> F[🚀 CI/CD 层<br/>Jenkins / Fastlane / GitHub Actions]
+    B & C & D --> E[🛠️ 基础设施层<br/>Config / Logger / Utils]
+    E --> F[🚀 CI/CD 层<br/>GitHub Actions / Fastlane]
 ```
 
 ---
@@ -52,23 +52,24 @@ iOS-Automation-Framework/
 ├── config/                        # Configuration layer
 │   ├── __init__.py
 │   ├── settings.py                # Global settings
-│   └── environments.yaml          # Multi-env config
+│   ├── environments.yaml          # Multi-env config
+│   └── local.yml.example          # Local config template
 │
 ├── utils/                         # Utility layer
 │   ├── __init__.py
-│   ├── log_util.py                # Logger
+│   ├── log_util.py                # Logger (loguru)
 │   ├── request_util.py            # HTTP client
 │   ├── assertion_util.py          # Assertions
-│   ├── db_util.py                 # Database helper
 │   └── screenshot_util.py         # Screenshot helper
 │
-├── UI_Automation/                 # UI tests (Appium)
+├── UI_Automation/                 # UI tests (Appium + XCUITest)
 │   ├── Pages/                     # Page Object Model
 │   │   ├── __init__.py
 │   │   ├── base_page.py           # Base page class
 │   │   ├── login_page.py          # Login page
 │   │   ├── home_page.py           # Home page
 │   │   ├── category_page.py       # Category page
+│   │   ├── search_page.py         # Search page
 │   │   ├── product_detail_page.py # Product detail
 │   │   ├── cart_page.py           # Cart page
 │   │   └── order_page.py          # Order page
@@ -79,7 +80,7 @@ iOS-Automation-Framework/
 │   │   ├── test_search.py         # Search tests
 │   │   ├── test_cart.py           # Cart tests
 │   │   └── test_order.py          # Order flow tests
-│   ├── screenshots/               # Failure screenshots
+│   ├── __init__.py
 │   └── conftest.py                # UI fixtures
 │
 ├── API_Automation/                # API tests
@@ -96,18 +97,14 @@ iOS-Automation-Framework/
 │   │   ├── test_product.py        # Product tests
 │   │   ├── test_cart.py           # Cart tests
 │   │   └── test_order.py          # Order tests
-│   ├── data/                      # Test data
-│   │   ├── user_data.yaml         # User data
-│   │   ├── product_data.yaml      # Product data
-│   │   └── order_data.yaml        # Order data
-│   └── utils/
-│       └── data_loader.py         # YAML data loader
+│   └── data/                      # Test data (YAML)
+│       ├── user_data.yaml
+│       ├── product_data.yaml
+│       └── order_data.yaml
 │
 ├── Performance/                   # Performance tests
 │   └── locust_scripts/
-│       ├── __init__.py
-│       ├── locustfile.py          # Locust entry point
-│       └── api_scenarios.py       # Load scenarios
+│       └── locustfile.py          # Locust entry point
 │
 ├── CI/                            # CI/CD config
 │   ├── jenkins/
@@ -115,12 +112,10 @@ iOS-Automation-Framework/
 │   └── fastlane/
 │       └── Fastfile               # Fastlane config
 │
-├── Reports/                       # Test report output
-│   └── .gitkeep
+├── Reports/                       # Test report output (git-ignored)
 │
 └── docs/                          # Documentation
-    ├── design.md                  # Design notes
-    └── api_interface.md           # API reference
+    └── design.md                  # Design notes
 ```
 
 | 目录 | 说明 |
@@ -171,28 +166,26 @@ cp config/local.yml.example config/local.yml
 ### 运行测试
 
 ```bash
-# ====== 运行接口自动化测试 ======
-# 运行所有接口测试
+# ====== 接口自动化测试（并发执行）======
 pytest API_Automation/cases -v --alluredir=./Reports/api-results
 
 # 运行指定模块
 pytest API_Automation/cases/test_user.py -v
 
-# 运行并生成 Allure 报告
-pytest API_Automation/cases -v --alluredir=./Reports/api-results
+# 生成 Allure 报告
 allure generate ./Reports/api-results -o ./Reports/api-report --clean
+allure open ./Reports/api-report
 
-# ====== 运行 UI 自动化测试 ======
-# 启动 Appium Server（新终端）
+# ====== UI 自动化测试（串行，需要真机/模拟器）======
+# 1. 启动 Appium Server（新终端）
 appium
 
-# 运行 UI 测试
-pytest UI_Automation/Tests -v --alluredir=./Reports/ui-results \
-  --driver-remote-url=http://127.0.0.1:4723
+# 2. 运行 UI 测试（-n 0 覆盖 pytest.ini 的并发设置）
+pytest UI_Automation/Tests -v -n 0 --alluredir=./Reports/ui-results
 
-# ====== 运行性能测试 ======
+# ====== 性能测试 ======
 cd Performance/locust_scripts
-locust -f locustfile.py --host=https://api.yunlu.com
+locust -f locustfile.py --host=https://api-dev.yunlu.com
 ```
 
 ---
@@ -318,20 +311,6 @@ login_cases:
 
 ---
 
-## 📈 Jenkins CI/CD 集成
-
-项目内置了完整的 Jenkins Pipeline 配置：
-
-1. **Checkout** → 从 Git 拉取最新代码
-2. **Install Dependencies** → pip install -r requirements.txt  
-3. **Run API Tests** → 执行接口自动化
-4. **Run UI Tests** → 执行 UI 自动化
-5. **Generate Report** → 生成 Allure 报告
-6. **Notify** → 钉钉/企业微信通知结果
-
-详细配置请参考 `CI/jenkins/Jenkinsfile`。
-
----
 
 ## 🤝 贡献指南
 
