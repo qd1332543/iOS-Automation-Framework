@@ -242,14 +242,14 @@ class BasePage:
             return False
     
     def wait_for_page_load(self, timeout: int = 10):
-        """等待页面加载完成"""
+        """等待页面加载完成（等待页面元素稳定）"""
+        from selenium.common.exceptions import TimeoutException
         try:
             WebDriverWait(self.driver, timeout, self.POLL_FREQUENCY).until(
-                lambda d: d.execute_script("return document.readyState") == "complete"
-                or len(d.find_elements("xpath", "//*")) > 0
+                lambda d: len(d.find_elements("xpath", "//*")) > 0
             )
-        except Exception:
-            pass
+        except TimeoutException:
+            self.logger.warning("⏰ wait_for_page_load 超时，页面可能未完全加载")
         self.logger.debug("⏳ 等待页面加载")
     
     def custom_wait(self, condition, timeout: int = DEFAULT_TIMEOUT):
