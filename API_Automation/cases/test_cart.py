@@ -35,7 +35,7 @@ class TestCart:
             cart = self.cart_api.get_cart_list(self.token)
             AssertUtil().assert_response_code(cart)
             items = cart.get("data", {}).get("items", [])
-            assert len(items) > 0, "购物车应为空"
+            assert len(items) > 0, "购物车不应为空"
     
     @allure.title("获取购物车汇总信息")
     @allure.severity(allure.severity_level.NORMAL)
