@@ -68,10 +68,10 @@ class OrderAPI(BaseAPI):
     # ===== 订单操作 =====
     
     def cancel_order(
-        self, 
-        order_no: str, 
+        self,
+        order_no: str,
         reason: str = "",
-        token: str
+        token: str = None
     ) -> dict:
         """取消订单"""
         return self.post(
@@ -91,10 +91,10 @@ class OrderAPI(BaseAPI):
     # ===== 支付 =====
     
     def get_pay_params(
-        self, 
-        order_no: str, 
+        self,
+        order_no: str,
         pay_method: str = "wechat",  # wechat/alipay
-        token: str
+        token: str = None
     ) -> dict:
         """获取支付参数"""
         return self.post(
