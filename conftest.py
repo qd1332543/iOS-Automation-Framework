@@ -107,6 +107,16 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "ui: UI测试")
 
 
+def pytest_collection_modifyitems(items):
+    """无 API_BASE_URL 时跳过所有接口集成测试"""
+    if os.getenv("API_BASE_URL"):
+        return
+    skip = pytest.mark.skip(reason="API_BASE_URL not set; skipping integration tests")
+    for item in items:
+        if "API_Automation/cases" in str(item.fspath).replace("\\", "/"):
+            item.add_marker(skip)
+
+
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item, call):
     """

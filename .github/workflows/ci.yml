@@ -38,6 +38,7 @@ jobs:
       - name: 发布 JUnit 结果
         uses: dorny/test-reporter@v1
         if: always()
+        continue-on-error: true
         with:
           name: API Test Results
           path: Reports/junit-api.xml
