@@ -15,6 +15,7 @@ from appium.webdriver.common.appiumby import AppiumBy
 from appium.webdriver.webdriver import WebDriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 
 from utils.log_util import get_logger
 from utils.screenshot_util import ScreenshotUtil
@@ -243,10 +244,9 @@ class BasePage:
     
     def wait_for_page_load(self, timeout: int = 10):
         """等待页面加载完成（等待页面元素稳定）"""
-        from selenium.common.exceptions import TimeoutException
         try:
             WebDriverWait(self.driver, timeout, self.POLL_FREQUENCY).until(
-                lambda d: len(d.find_elements("xpath", "//*")) > 0
+                EC.presence_of_element_located(("xpath", "//*[@identifier or @name]"))
             )
         except TimeoutException:
             self.logger.warning("⏰ wait_for_page_load 超时，页面可能未完全加载")
