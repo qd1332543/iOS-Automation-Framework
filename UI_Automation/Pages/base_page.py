@@ -187,33 +187,42 @@ class BasePage:
     def swipe_up(self, duration: int = 800):
         """向上滑动（内容向下滚动）"""
         size = self.driver.get_window_size()
-        start_x = size["width"] / 2
-        start_y = size["height"] * 0.7
-        end_y = size["height"] * 0.3
-        
-        self.driver.swipe(start_x, start_y, start_x, end_y, duration)
+        start_x = int(size["width"] / 2)
+        start_y = int(size["height"] * 0.7)
+        end_y = int(size["height"] * 0.3)
+        self.driver.execute_script("mobile: dragFromToForDuration", {
+            "duration": duration / 1000,
+            "fromX": start_x, "fromY": start_y,
+            "toX": start_x, "toY": end_y
+        })
         self.logger.debug("👆 向上滑动")
         return self
     
     def swipe_down(self, duration: int = 800):
         """向下滑动（内容向上滚动）"""
         size = self.driver.get_window_size()
-        start_x = size["width"] / 2
-        start_y = size["height"] * 0.3
-        end_y = size["height"] * 0.7
-        
-        self.driver.swipe(start_x, start_y, start_x, end_y, duration)
+        start_x = int(size["width"] / 2)
+        start_y = int(size["height"] * 0.3)
+        end_y = int(size["height"] * 0.7)
+        self.driver.execute_script("mobile: dragFromToForDuration", {
+            "duration": duration / 1000,
+            "fromX": start_x, "fromY": start_y,
+            "toX": start_x, "toY": end_y
+        })
         self.logger.debug("👇 向下滑动")
         return self
     
     def swipe_left(self, duration: int = 500):
         """向左滑动"""
         size = self.driver.get_window_size()
-        start_x = size["width"] * 0.8
-        end_x = size["width"] * 0.2
-        y = size["height"] / 2
-        
-        self.driver.swipe(start_x, y, end_x, y, duration)
+        start_x = int(size["width"] * 0.8)
+        end_x = int(size["width"] * 0.2)
+        y = int(size["height"] / 2)
+        self.driver.execute_script("mobile: dragFromToForDuration", {
+            "duration": duration / 1000,
+            "fromX": start_x, "fromY": y,
+            "toX": end_x, "toY": y
+        })
         self.logger.debug("⬅️ 向左滑动")
         return self
     
@@ -242,15 +251,25 @@ class BasePage:
             self.logger.warning(f"⏰ 文本未出现: {text}")
             return False
     
-    def wait_for_page_load(self, timeout: int = 10):
-        """等待页面加载完成（等待页面元素稳定）"""
+    def wait_for_page_load(self, condition=None, timeout: int = 10) -> bool:
+        """等待页面加载完成
+
+        Args:
+            condition: 自定义等待条件（lambda driver: bool），默认等待元素数量 > 1
+            timeout: 超时时间
+
+        Returns:
+            True 表示加载成功，False 表示超时
+        """
+        self.logger.debug("⏳ 等待页面加载")
+        wait_condition = condition or (lambda d: len(d.find_elements("xpath", "//*")) > 1)
         try:
-            WebDriverWait(self.driver, timeout, self.POLL_FREQUENCY).until(
-                EC.presence_of_element_located(("xpath", "//*[@identifier or @name]"))
-            )
+            WebDriverWait(self.driver, timeout, self.POLL_FREQUENCY).until(wait_condition)
+            self.logger.debug("✅ 页面加载完成")
+            return True
         except TimeoutException:
             self.logger.warning("⏰ wait_for_page_load 超时，页面可能未完全加载")
-        self.logger.debug("⏳ 等待页面加载")
+            return False
     
     def custom_wait(self, condition, timeout: int = DEFAULT_TIMEOUT):
         """自定义等待条件"""
