@@ -185,7 +185,11 @@ class BasePage:
     # ==================== 手势操作 ====================
 
     def _drag(self, from_x: int, from_y: int, to_x: int, to_y: int, duration_ms: int):
-        """执行 W3C drag 手势（内部 helper）"""
+        """执行 W3C drag 手势（内部 helper）
+
+        注意：仅支持 iOS XCUITest driver，使用 mobile: dragFromToForDuration 命令。
+        duration_ms 单位为毫秒，内部转换为秒传给 Appium。
+        """
         self.driver.execute_script("mobile: dragFromToForDuration", {
             "duration": duration_ms / 1000,
             "fromX": from_x, "fromY": from_y,
@@ -245,11 +249,18 @@ class BasePage:
         """等待页面加载完成
 
         Args:
-            condition: 自定义等待条件（lambda driver: bool），默认等待元素数量 > 1
-            timeout: 超时时间
+            condition: 自定义等待条件（lambda driver: bool）。
+                强烈建议调用方传入页面特定的条件（如等待某个关键元素出现），
+                默认条件仅检查 page_source 长度，可能在某些页面产生误判。
+            timeout: 超时时间（秒）
 
         Returns:
             True 表示加载成功，False 表示超时
+
+        Example:
+            page.wait_for_page_load(
+                condition=lambda d: d.find_elements(AppiumBy.ACCESSIBILITY_ID, "home_title")
+            )
         """
         self.logger.debug("⏳ 等待页面加载")
         wait_condition = condition or (lambda d: len(d.page_source) > 100)
