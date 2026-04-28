@@ -1,0 +1,26 @@
+name: Publish Test Report
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+    steps:
+      - name: 下载 JUnit 结果
+        uses: actions/download-artifact@v4
+        with:
+          name: junit-results
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 发布 JUnit 结果
+        uses: dorny/test-reporter@v1
+        with:
+          name: API Test Results
+          path: junit-api.xml
+          reporter: java-junit

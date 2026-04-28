@@ -9,8 +9,6 @@ on:
 jobs:
   api-test:
     runs-on: ubuntu-latest
-    permissions:
-      checks: write
     steps:
       - uses: actions/checkout@v4
 
@@ -30,18 +28,16 @@ jobs:
             --junitxml=./Reports/junit-api.xml
         continue-on-error: true
 
-      - name: 上传测试报告
+      - name: 上传 allure 结果
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: allure-results
           path: Reports/api-results/
 
-      - name: 发布 JUnit 结果
-        uses: dorny/test-reporter@v1
+      - name: 上传 JUnit 结果
+        uses: actions/upload-artifact@v4
         if: always()
-        continue-on-error: true
         with:
-          name: API Test Results
+          name: junit-results
           path: Reports/junit-api.xml
-          reporter: java-junit
