@@ -1,6 +1,9 @@
 """
 BasePage - 页面基类（Page Object 模式的核心）
 
+本框架专为 iOS + XCUITest 设计，不支持 Android 或其他平台。
+所有手势操作均基于 Appium mobile: 扩展命令。
+
 封装了所有通用的页面操作：
 - 元素定位与等待
 - 点击、输入、滑动
@@ -8,7 +11,6 @@ BasePage - 页面基类（Page Object 模式的核心）
 - 显式等待策略
 """
 import os
-import time
 from typing import List, Optional, Tuple, Union
 
 from appium import webdriver
@@ -16,6 +18,7 @@ from appium.webdriver.common.appiumby import AppiumBy
 from appium.webdriver.webdriver import WebDriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 
 from utils.log_util import get_logger
 from utils.screenshot_util import ScreenshotUtil
@@ -23,14 +26,15 @@ from utils.screenshot_util import ScreenshotUtil
 
 class BasePage:
     """
-    Page Object 基类
-    
+    Page Object 基类（仅支持 iOS + XCUITest）
+
     所有页面的父类，提供：
     1. 统一的元素操作方法（wait_and_click, wait_and_input 等）
-    2. 多种元素定位策略自动切换
-    3. 显式等待机制
-    4. 自动失败截图
-    5. 操作日志记录
+    2. 显式等待机制
+    3. 自动失败截图
+    4. 操作日志记录
+
+    注意：手势操作（swipe_*）依赖 Appium mobile: 扩展命令，仅适用于 iOS XCUITest driver。
     """
     
     # 默认超时时间（秒）
@@ -125,8 +129,6 @@ class BasePage:
             # 尝试使用 JavaScript 点击（解决 iOS 偶发点击失败问题）
             self.logger.debug("尝试 JS Click...")
             self.driver.execute_script("arguments[0].click();", element)
-        
-        time.sleep(0.3)  # 短暂等待 UI 响应
         return self
     
     def wait_and_input(
@@ -154,13 +156,11 @@ class BasePage:
         self.logger.info(f"⌨️  {desc}")
         
         element = self._find_element(locator, timeout)
-        
+
         if clear_first:
             element.clear()
-            time.sleep(0.2)
-        
+
         element.send_keys(text)
-        time.sleep(0.3)
         return self
     
     def wait_and_get_text(
@@ -187,41 +187,41 @@ class BasePage:
             return False
     
     # ==================== 手势操作 ====================
-    
-    def swipe_up(self, duration: int = 800):
-        """向上滑动（内容向下滚动）"""
+
+    def _drag(self, from_x: int, from_y: int, to_x: int, to_y: int, duration_ms: int):
+        """执行 drag 手势（内部 helper）
+
+        使用 Appium mobile: dragFromToForDuration 命令。
+        duration_ms 单位为毫秒，内部转换为秒传给 Appium。
+        """
+        self.driver.execute_script("mobile: dragFromToForDuration", {
+            "duration": duration_ms / 1000,
+            "fromX": from_x, "fromY": from_y,
+            "toX": to_x, "toY": to_y
+        })
+
+    def swipe_up(self, duration_ms: int = 800):
+        """向上滑动（内容向下滚动）。duration_ms 单位为毫秒"""
         size = self.driver.get_window_size()
-        start_x = size["width"] / 2
-        start_y = size["height"] * 0.7
-        end_y = size["height"] * 0.3
-        
-        self.driver.swipe(start_x, start_y, start_x, end_y, duration)
+        x = int(size["width"] / 2)
+        self._drag(x, int(size["height"] * 0.7), x, int(size["height"] * 0.3), duration_ms)
         self.logger.debug("👆 向上滑动")
-        time.sleep(0.5)
         return self
-    
-    def swipe_down(self, duration: int = 800):
-        """向下滑动（内容向上滚动）"""
+
+    def swipe_down(self, duration_ms: int = 800):
+        """向下滑动（内容向上滚动）。duration_ms 单位为毫秒"""
         size = self.driver.get_window_size()
-        start_x = size["width"] / 2
-        start_y = size["height"] * 0.3
-        end_y = size["height"] * 0.7
-        
-        self.driver.swipe(start_x, start_y, start_x, end_y, duration)
+        x = int(size["width"] / 2)
+        self._drag(x, int(size["height"] * 0.3), x, int(size["height"] * 0.7), duration_ms)
         self.logger.debug("👇 向下滑动")
-        time.sleep(0.5)
         return self
-    
-    def swipe_left(self, duration: int = 500):
-        """向左滑动"""
+
+    def swipe_left(self, duration_ms: int = 500):
+        """向左滑动。duration_ms 单位为毫秒"""
         size = self.driver.get_window_size()
-        start_x = size["width"] * 0.8
-        end_x = size["width"] * 0.2
-        y = size["height"] / 2
-        
-        self.driver.swipe(start_x, y, end_x, y, duration)
+        y = int(size["height"] / 2)
+        self._drag(int(size["width"] * 0.8), y, int(size["width"] * 0.2), y, duration_ms)
         self.logger.debug("⬅️ 向左滑动")
-        time.sleep(0.5)
         return self
     
     def tap_by_coordinate(self, x: int, y: int):
@@ -230,7 +230,6 @@ class BasePage:
         action = TouchAction(self.driver)
         action.tap(x=x, y=y).perform()
         self.logger.debug(f"👆 坐标点击 ({x}, {y})")
-        time.sleep(0.3)
         return self
     
     # ==================== 等待方法 ====================
@@ -250,12 +249,25 @@ class BasePage:
             self.logger.warning(f"⏰ 文本未出现: {text}")
             return False
     
-    def wait_for_page_load(self, timeout: int = 10):
-        """等待页面加载完成（通过判断 activity）"""
-        # iOS 上可以检查当前 bundle identifier 或 page source 变化
-        time.sleep(1)  # 最小等待
-        # 实际场景中可以根据具体 App 特征来判断
+    def wait_for_page_load(self, condition, timeout: int = 10) -> bool:
+        """等待页面加载完成
+
+        Args:
+            condition: 等待条件（lambda driver: bool），必须传入页面特定的条件。
+                例如：lambda d: d.find_elements(AppiumBy.ACCESSIBILITY_ID, "home_title")
+            timeout: 超时时间（秒）
+
+        Returns:
+            True 表示加载成功，False 表示超时
+        """
         self.logger.debug("⏳ 等待页面加载")
+        try:
+            WebDriverWait(self.driver, timeout, self.POLL_FREQUENCY).until(condition)
+            self.logger.debug("✅ 页面加载完成")
+            return True
+        except TimeoutException:
+            self.logger.warning("⏰ wait_for_page_load 超时，页面可能未完全加载")
+            return False
     
     def custom_wait(self, condition, timeout: int = DEFAULT_TIMEOUT):
         """自定义等待条件"""
