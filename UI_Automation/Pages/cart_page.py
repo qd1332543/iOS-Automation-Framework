@@ -1,5 +1,4 @@
 """购物车页 - 云鹿商城"""
-import time
 from appium.webdriver.common.appiumby import AppiumBy
 
 from UI_Automation.Pages.base_page import BasePage
@@ -61,12 +60,11 @@ class CartPage(BasePage):
         """全选所有商品"""
         self.log_step("全选购物车商品")
         self.wait_and_click(self._SELECT_ALL)
-        time.sleep(0.5)
         return self
     
     _SWIPE_START_RATIO = 0.8
     _SWIPE_END_RATIO = 0.2
-    _SWIPE_DURATION_MS = 500
+    _SWIPE_DURATION_SECONDS = 0.5
 
     def delete_first_item(self) -> "CartPage":
         """删除第一个商品"""
@@ -80,7 +78,7 @@ class CartPage(BasePage):
             end_x = int(location["x"] + size["width"] * self._SWIPE_END_RATIO)
             y = int(location["y"] + size["height"] / 2)
             self.driver.execute_script("mobile: dragFromToForDuration", {
-                "duration": self._SWIPE_DURATION_MS / 1000,
+                "duration": self._SWIPE_DURATION_SECONDS,
                 "fromX": start_x, "fromY": y,
                 "toX": end_x, "toY": y
             })
@@ -91,7 +89,6 @@ class CartPage(BasePage):
         """去结算"""
         self.log_step("去结算")
         self.wait_and_click(self._CHECKOUT_BTN)
-        time.sleep(1.5)
         return OrderPage(self.driver)
     
     def get_total_price(self) -> str:
