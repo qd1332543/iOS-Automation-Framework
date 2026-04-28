@@ -1,5 +1,4 @@
 """购物车页 - 云鹿商城"""
-import time
 from appium.webdriver.common.appiumby import AppiumBy
 
 from UI_Automation.Pages.base_page import BasePage
@@ -61,28 +60,32 @@ class CartPage(BasePage):
         """全选所有商品"""
         self.log_step("全选购物车商品")
         self.wait_and_click(self._SELECT_ALL)
-        time.sleep(0.5)
         return self
     
+    _SWIPE_START_RATIO = 0.8
+    _SWIPE_END_RATIO = 0.2
+    _SWIPE_DURATION_SECONDS = 0.5
+
     def delete_first_item(self) -> "CartPage":
         """删除第一个商品"""
         self.log_step("删除第一个商品")
-        items = self._find_elements(_CART_ITEM, timeout=5)
+        items = self._find_elements(self._CART_ITEM, timeout=5)
         if items:
-            # 先左滑显示删除按钮
             item = items[0]
+            self.driver.execute_script("mobile: scroll", {"element": item, "toVisible": True})
             size = item.size
-            item.swipe(size["width"], size["height"]/2, 0, size["height"]/2, 500)
-            time.sleep(0.5)
+            location = item.location
+            start_x = int(location["x"] + size["width"] * self._SWIPE_START_RATIO)
+            end_x = int(location["x"] + size["width"] * self._SWIPE_END_RATIO)
+            y = int(location["y"] + size["height"] / 2)
+            self._drag(start_x, y, end_x, y, int(self._SWIPE_DURATION_SECONDS * 1000))
             self.wait_and_click(self._ITEM_DELETE)
-            time.sleep(0.5)
         return self
     
     def checkout(self) -> OrderPage:
         """去结算"""
         self.log_step("去结算")
         self.wait_and_click(self._CHECKOUT_BTN)
-        time.sleep(1.5)
         return OrderPage(self.driver)
     
     def get_total_price(self) -> str:
