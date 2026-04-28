@@ -7,7 +7,7 @@ from utils.assertion_util import AssertUtil
 
 
 @allure.feature("购物车模块")
-@allue.story("购物车操作")
+@allure.story("购物车操作")
 class TestCart:
     """购物车接口测试"""
     
@@ -17,7 +17,7 @@ class TestCart:
         self.product_api = ProductAPI(request_util)
         self.token = login_token
     
-    @allue.title("添加商品到购物车-正常流程")
+    @allure.title("添加商品到购物车-正常流程")
     @allure.severity(allure.severity_level.CRITICAL)
     @pytest.mark.smoke
     def test_add_to_cart(self):
@@ -37,7 +37,7 @@ class TestCart:
             items = cart.get("data", {}).get("items", [])
             assert len(items) > 0, "购物车应为空"
     
-    @allue.title("获取购物车汇总信息")
+    @allure.title("获取购物车汇总信息")
     @allure.severity(allure.severity_level.NORMAL)
     def test_cart_summary(self):
         # 先确保有商品
