@@ -56,3 +56,9 @@ allure-results-history/
 
 # 本地配置（含敏感信息，不提交）
 config/local.yml
+
+# ==================== Web UI 运行产物 ====================
+Reports/webui-runs/*/logs.txt
+Reports/webui-runs/*/allure-results/
+Reports/webui-runs/*/allure-report/
+tools/webui/.env

@@ -1,6 +1,6 @@
 # 🧪 iOS-Automation-Framework
 
-> **基于云鹿商城的移动端自动化测试框架** | Appium + pytest + Allure + GitHub Actions
+> **基于云鹿商城的移动端自动化测试框架** | Appium + pytest + Allure + GitHub Actions + Web UI
 
 ![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
 ![Framework](https://img.shields.io/badge/Framework-Appium+pytest-green.svg)
@@ -10,7 +10,7 @@
 
 ## 📋 项目简介
 
-本项目是一个完整的 **iOS 移动端自动化测试框架**，以**云鹿商城 App** 为测试对象，实现了 **UI 自动化测试**、**接口自动化测试**、**性能测试** 三位一体的测试解决方案。
+本项目是一个完整的 **iOS 移动端自动化测试框架**，以**云鹿商城 App** 为测试对象，实现了 **UI 自动化测试**、**接口自动化测试**、**性能测试** 三位一体的测试解决方案，并内置 **Web 控制台**，支持在浏览器中浏览代码、执行测试、查看实时日志和 Allure 报告。
 
 ### 核心特性
 
@@ -22,6 +22,7 @@
 | 📈 **Allure 报告** | 可视化测试报告，支持历史趋势 |
 | 🔄 **GitHub Actions CI** | 自动化流水线，PR 触发执行 |
 | ⚡ **性能测试** | 基于 Locust 的压力测试脚本 |
+| 🌐 **Web 控制台** | 本地 Web UI，支持代码浏览、测试执行、AI 问答 |
 
 ---
 
@@ -36,6 +37,7 @@ graph TD
 
     B & C & D --> E[🛠️ 基础设施层<br/>Config / Logger / Utils]
     E --> F[🚀 CI/CD 层<br/>GitHub Actions / Fastlane]
+    E --> G[🌐 Web 控制台<br/>FastAPI + Alpine.js]
 ```
 
 ---
@@ -113,6 +115,27 @@ iOS-Automation-Framework/
 │       └── Fastfile               # Fastlane config
 │
 ├── Reports/                       # Test report output (git-ignored)
+│   └── webui-runs/                # Web UI 每次运行的独立报告目录
+│       └── {run_id}/
+│           ├── logs.txt           # pytest 输出（已脱敏）
+│           ├── allure-results/    # Allure 原始数据
+│           └── allure-report/     # Allure HTML 报告
+│
+├── tools/                         # 工具目录
+│   └── webui/                     # Web 控制台
+│       ├── app.py                 # FastAPI 主入口
+│       ├── config.py              # 配置（读取环境变量）
+│       ├── models.py              # Run 任务模型
+│       ├── .env.example           # 配置模板
+│       ├── services/
+│       │   ├── ai_service.py      # AI 问答（mock / Claude）
+│       │   ├── allure_service.py  # Allure 报告生成
+│       │   ├── env_service.py     # 环境检查
+│       │   ├── file_service.py    # 文件树/内容（白名单）
+│       │   ├── run_service.py     # 测试执行（subprocess）
+│       │   └── sanitize.py        # 日志脱敏
+│       └── static/
+│           └── index.html         # Alpine.js 单页前端
 │
 └── docs/                          # Documentation
     └── design.md                  # Design notes
@@ -125,8 +148,9 @@ iOS-Automation-Framework/
 | `UI_Automation/` | Appium UI 自动化，Page Object 模式 |
 | `API_Automation/` | 接口自动化，数据与用例分离 |
 | `Performance/` | Locust 性能压测脚本 |
-| `CI/` | Jenkins Pipeline + Fastlane 配置 |
-| `Reports/` | Allure 报告输出目录 |
+| `CI/` | GitHub Actions / Fastlane 配置 |
+| `Reports/` | Allure 报告输出目录，webui-runs/ 存放 Web UI 运行记录 |
+| `tools/webui/` | Web 控制台：代码浏览、测试执行、AI 问答 |
 
 ---
 
@@ -190,7 +214,63 @@ locust -f locustfile.py --host=https://api-dev.yunlu.com
 
 ---
 
-## 🎨 设计思路
+## 🌐 Web 控制台
+
+内置本地 Web UI，无需命令行即可浏览代码、执行测试、查看实时日志和 Allure 报告。
+
+### 启动
+
+```bash
+python -m uvicorn tools.webui.app:app --host 127.0.0.1 --port 8000
+# 访问 http://127.0.0.1:8000
+```
+
+### 配置
+
+复制配置模板并按需修改：
+
+```bash
+cp tools/webui/.env.example tools/webui/.env
+```
+
+关键配置项：
+
+| 变量 | 默认值 | 说明 |
+|------|--------|------|
+| `AI_PROVIDER` | `mock` | `mock` 或 `claude`（需配合 `AI_API_KEY`） |
+| `AI_MODEL` | `claude-sonnet-4-6` | AI 模型 ID，可替换为其他模型 |
+| `AI_API_KEY` | 空 | Claude API Key，mock 模式下不需要 |
+| `ALLURE_BIN` | `allure` | allure 命令路径 |
+| `MAX_CONCURRENT_RUNS` | `1` | 最大并发任务数 |
+
+### 功能说明
+
+| 功能 | 说明 |
+|------|------|
+| 文件树浏览 | 只展示白名单文件，敏感文件不可访问 |
+| 代码查看 | 只读，单文件最大 200KB |
+| AI 问答 | 基于项目文件检索回答，mock 模式无需 API Key |
+| 测试执行 | 固定模块白名单，不支持任意命令输入 |
+| 实时日志 | SSE 推送，日志自动脱敏（token、密码等） |
+| Allure 报告 | 每次运行独立目录，需安装 allure 命令 |
+| 环境检查 | 自动检测 Python/pytest/Allure/Appium/Xcode 状态 |
+
+### 运行记录
+
+每次执行测试会在 `Reports/webui-runs/{run_id}/` 生成：
+
+```
+{run_id}/
+├── logs.txt           # pytest 完整输出（已脱敏）
+├── allure-results/    # Allure 原始数据
+└── allure-report/     # Allure HTML 报告（需 allure 命令）
+```
+
+### 注意事项
+
+- iOS UI 测试需要 **macOS + Xcode + Appium**，Windows/Linux 下 UI 模块自动禁用
+- Web UI 仅供本地单用户 Demo 使用，不适合生产部署
+- 接入真实 AI 需设置 `AI_PROVIDER=claude` 和 `AI_API_KEY`
 
 ### 为什么选择 Page Object 模式？
 

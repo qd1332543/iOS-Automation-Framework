@@ -43,3 +43,10 @@ python-dotenv~=1.1.0
 
 # Screenshot & Image
 Pillow~=11.2.1
+
+# Web UI (tools/webui)
+fastapi~=0.115.0
+uvicorn[standard]~=0.32.0
+sse-starlette~=2.1.0
+# Optional: AI integration (set AI_PROVIDER=claude in .env)
+# anthropic~=0.40.0
