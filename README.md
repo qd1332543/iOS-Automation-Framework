@@ -10,7 +10,11 @@
 
 ## 📋 项目简介
 
-本项目是一个完整的 **iOS 移动端自动化测试框架**，以**云鹿商城 App** 为测试对象，实现了 **UI 自动化测试**、**接口自动化测试**、**性能测试** 三位一体的测试解决方案，并内置 **Web 控制台**，支持在浏览器中浏览代码、执行测试、查看实时日志和 Allure 报告。
+本项目是一个完整的 **iOS 移动端自动化测试工程**，以**云鹿商城 App** 为测试对象，实现了 **UI 自动化测试**、**接口自动化测试**、**性能测试** 三位一体的测试解决方案。
+
+它在通用测试平台体系中的定位是：**测试代码载体和第一个接入样板**。本仓库负责“怎么测”，例如 pytest/Appium 用例、Page Object、测试数据、断言和报告输出；通用平台和 Local Agent 负责“谁来调度、在哪里执行、如何回传结果”。
+
+内置的 `tools/webui` 仅作为单项目本地 Demo 控制台，用于浏览代码、执行测试、查看实时日志和 Allure 报告，不承担平台中心或通用 Agent 职责。
 
 ### 核心特性
 
@@ -22,7 +26,8 @@
 | 📈 **Allure 报告** | 可视化测试报告，支持历史趋势 |
 | 🔄 **GitHub Actions CI** | 自动化流水线，PR 触发执行 |
 | ⚡ **性能测试** | 基于 Locust 的压力测试脚本 |
-| 🌐 **Web 控制台** | 本地 Web UI，支持代码浏览、测试执行、AI 问答 |
+| 🌐 **本地 Demo 控制台** | 本地 Web UI，支持代码浏览、测试执行、AI 问答 |
+| 🔗 **平台接入协议** | 通过 `test-platform.yml` 描述套件、命令、依赖和产物路径 |
 
 ---
 
@@ -37,7 +42,7 @@ graph TD
 
     B & C & D --> E[🛠️ 基础设施层<br/>Config / Logger / Utils]
     E --> F[🚀 CI/CD 层<br/>GitHub Actions / Fastlane]
-    E --> G[🌐 Web 控制台<br/>FastAPI + Alpine.js]
+    E --> G[🌐 本地 Demo 控制台<br/>FastAPI + Alpine.js]
 ```
 
 ---
@@ -47,6 +52,7 @@ graph TD
 ```
 iOS-Automation-Framework/
 ├── README.md                      # Project documentation
+├── test-platform.yml              # TestPlatform suite contract
 ├── requirements.txt               # Python dependencies
 ├── pytest.ini                     # pytest configuration
 ├── conftest.py                    # Global fixtures
@@ -122,7 +128,7 @@ iOS-Automation-Framework/
 │           └── allure-report/     # Allure HTML 报告
 │
 ├── tools/                         # 工具目录
-│   └── webui/                     # Web 控制台
+│   └── webui/                     # 本地 Demo 控制台
 │       ├── app.py                 # FastAPI 主入口
 │       ├── config.py              # 配置（读取环境变量）
 │       ├── models.py              # Run 任务模型
@@ -138,7 +144,8 @@ iOS-Automation-Framework/
 │           └── index.html         # Alpine.js 单页前端
 │
 └── docs/                          # Documentation
-    └── design.md                  # Design notes
+    ├── design.md                  # Design notes
+    └── platform-integration.md    # TestPlatform integration notes
 ```
 
 | 目录 | 说明 |
@@ -150,7 +157,9 @@ iOS-Automation-Framework/
 | `Performance/` | Locust 性能压测脚本 |
 | `CI/` | GitHub Actions / Fastlane 配置 |
 | `Reports/` | Allure 报告输出目录，webui-runs/ 存放 Web UI 运行记录 |
-| `tools/webui/` | Web 控制台：代码浏览、测试执行、AI 问答 |
+| `test-platform.yml` | 平台接入协议：声明项目、套件、命令、依赖和产物路径 |
+| `tools/webui/` | 本地 Demo 控制台：代码浏览、测试执行、AI 问答 |
+| `docs/platform-integration.md` | 与 TestPlatform / Local Agent 的职责边界和接入说明 |
 
 ---
 
@@ -212,11 +221,37 @@ cd Performance/locust_scripts
 locust -f locustfile.py --host=https://api-dev.yunlu.com
 ```
 
+### 平台接入执行
+
+通用平台或 Local Agent 应读取仓库根目录的 `test-platform.yml`，根据任务选择 suite 并执行其中的命令。
+
+示例：
+
+```bash
+# 平台任务 task_id=local-demo-001 时，API 全量套件可写入固定产物目录
+python -m pytest API_Automation/cases -v --alluredir=Reports/platform/local-demo-001/allure-results
+
+# UI 套件由 Local Agent 负责准备 Appium、设备和 ipa/app 包路径
+python -m pytest UI_Automation/Tests -v -n 0 --alluredir=Reports/platform/local-demo-001/allure-results
+```
+
+平台触发的运行建议统一输出到：
+
+```text
+Reports/platform/{task_id}/
+├── logs.txt
+├── allure-results/
+├── allure-report/
+└── screenshots/
+```
+
+被测 `.ipa` / `.app` 包应作为平台任务参数传入，例如 `app_path` 或 `app_url`。本仓库不负责构建 App，也不负责通用任务调度。
+
 ---
 
-## 🌐 Web 控制台
+## 🌐 本地 Demo 控制台
 
-内置本地 Web UI，无需命令行即可浏览代码、执行测试、查看实时日志和 Allure 报告。
+内置本地 Web UI，无需命令行即可浏览代码、执行测试、查看实时日志和 Allure 报告。它只用于本仓库本地调试和演示，不是通用测试平台。
 
 ### 启动
 
@@ -270,6 +305,7 @@ cp tools/webui/.env.example tools/webui/.env
 
 - iOS UI 测试需要 **macOS + Xcode + Appium**，Windows/Linux 下 UI 模块自动禁用
 - Web UI 仅供本地单用户 Demo 使用，不适合生产部署
+- 通用 Local Agent 应放在 TestPlatform 侧，本仓库只暴露测试套件和执行命令
 - 接入真实 AI 需设置 `AI_PROVIDER=claude` 和 `AI_API_KEY`
 
 ### 为什么选择 Page Object 模式？

@@ -1,0 +1,100 @@
+schema_version: 1
+
+project:
+  key: yunlu-ios
+  name: Yunlu iOS automation tests
+  description: API, iOS UI, and performance automation suites for Yunlu Mall.
+  type: mobile_app_tests
+
+repository:
+  role: test_repository
+  framework:
+    - pytest
+    - appium
+    - locust
+    - allure
+  platform:
+    - ios
+
+artifacts:
+  default_root: Reports/platform
+  allure_results: Reports/platform/{task_id}/allure-results
+  allure_report: Reports/platform/{task_id}/allure-report
+  logs: Reports/platform/{task_id}/logs.txt
+  screenshots: Reports/platform/{task_id}/screenshots
+
+parameters:
+  app_path:
+    description: Local ipa/app path or downloaded artifact path used by UI suites.
+    required: false
+  app_url:
+    description: Remote ipa/app artifact URL. The Local Agent should download it before running UI suites.
+    required: false
+  environment:
+    description: Target test environment, such as dev, staging, or prod.
+    required: true
+    default: staging
+
+suites:
+  - id: api_smoke
+    name: API smoke tests
+    type: api
+    command: python -m pytest API_Automation/cases -v -m smoke --alluredir=Reports/platform/{task_id}/allure-results
+    report:
+      allure: true
+    outputs:
+      allure_results: Reports/platform/{task_id}/allure-results
+
+  - id: api_all
+    name: API full regression
+    type: api
+    command: python -m pytest API_Automation/cases -v --alluredir=Reports/platform/{task_id}/allure-results
+    report:
+      allure: true
+    outputs:
+      allure_results: Reports/platform/{task_id}/allure-results
+
+  - id: ios_ui_smoke
+    name: iOS UI smoke tests
+    type: ui
+    command: python -m pytest UI_Automation/Tests -v -n 0 -m smoke --alluredir=Reports/platform/{task_id}/allure-results
+    requires:
+      - macos
+      - xcode
+      - appium
+      - ios_device_or_simulator
+    accepts_artifact:
+      - ipa
+      - app
+    report:
+      allure: true
+    outputs:
+      allure_results: Reports/platform/{task_id}/allure-results
+      screenshots: Reports/platform/{task_id}/screenshots
+
+  - id: ios_ui_all
+    name: iOS UI full regression
+    type: ui
+    command: python -m pytest UI_Automation/Tests -v -n 0 --alluredir=Reports/platform/{task_id}/allure-results
+    requires:
+      - macos
+      - xcode
+      - appium
+      - ios_device_or_simulator
+    accepts_artifact:
+      - ipa
+      - app
+    report:
+      allure: true
+    outputs:
+      allure_results: Reports/platform/{task_id}/allure-results
+      screenshots: Reports/platform/{task_id}/screenshots
+
+  - id: performance_all
+    name: Performance tests
+    type: performance
+    command: locust -f Performance/locust_scripts/locustfile.py --headless
+    requires:
+      - network
+    report:
+      allure: false

@@ -20,6 +20,7 @@ Reports/allure-results/
 Reports/allure-report/
 Reports/api-results/
 Reports/ui-results/
+Reports/platform/
 Reports/logs/
 UI_Automation/screenshots/
 *.log
@@ -58,7 +59,12 @@ allure-results-history/
 config/local.yml
 
 # ==================== Web UI 运行产物 ====================
+Reports/webui-runs/
 Reports/webui-runs/*/logs.txt
 Reports/webui-runs/*/allure-results/
 Reports/webui-runs/*/allure-report/
 tools/webui/.env
+
+# ==================== Local Playwright probes ====================
+recon.py
+test_basic.py
